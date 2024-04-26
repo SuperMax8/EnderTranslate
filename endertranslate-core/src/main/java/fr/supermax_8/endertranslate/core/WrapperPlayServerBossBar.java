@@ -1,4 +1,4 @@
-package fr.supermax_8.endertranslate.bungee;
+package fr.supermax_8.endertranslate.core;
 
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
