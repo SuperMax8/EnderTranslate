@@ -3,20 +3,23 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>fr.supermax_8</groupId>
+        <artifactId>endertranslate</artifactId>
+        <version>0.1.0</version>
+    </parent>
 
     <groupId>fr.supermax_8.endertranslate</groupId>
-    <artifactId>paper</artifactId>
-    <version>0.1.0</version>
-    <packaging>jar</packaging>
-
-    <name>endertranslate-paper</name>
+    <artifactId>compile</artifactId>
 
     <properties>
-        <java.version>1.8</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <build>
+        <finalName>EnderTranslate</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -30,63 +33,50 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
 
-    <repositories>
-        <repository>
-            <id>papermc-repo</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>devmart-other</id>
-            <url>https://nexuslite.gcnt.net/repos/other/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
-        <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.20.4-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
             <version>0.1.0</version>
         </dependency>
         <dependency>
-            <groupId>com.tcoded</groupId>
-            <artifactId>FoliaLib</artifactId>
-            <version>0.3.1</version>
-            <scope>compile</scope>
+            <groupId>fr.supermax_8.endertranslate</groupId>
+            <artifactId>paper</artifactId>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
-            <scope>provided</scope>
+            <groupId>fr.supermax_8.endertranslate</groupId>
+            <artifactId>endertranslate-bungee</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.supermax_8.endertranslate</groupId>
+            <artifactId>velocity</artifactId>
+            <version>0.1.0</version>
         </dependency>
     </dependencies>
+
 </project>

@@ -5,7 +5,7 @@ import org.eclipse.jetty.websocket.api.Session;
 
 public abstract class WsSession {
 
-    private final Session jettySession;
+    protected final Session jettySession;
 
 
     public WsSession(Session jettySession) {
@@ -13,9 +13,9 @@ public abstract class WsSession {
     }
 
 
-    public void sendPacket(Packet packet) {
+    public void sendPacket(WsPacket packet) {
         try {
-            jettySession.getRemote().sendString(EnderTranslate.getGson().toJson(new PacketWrapper(packet)));
+            jettySession.getRemote().sendString(EnderTranslate.getGson().toJson(new WsPacketWrapper(packet)));
         } catch (Exception e) {
             e.printStackTrace();
         }

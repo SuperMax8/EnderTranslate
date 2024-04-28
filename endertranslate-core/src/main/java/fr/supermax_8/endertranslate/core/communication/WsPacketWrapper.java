@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class PacketWrapper {
+public class WsPacketWrapper {
 
     @Getter
-    private Packet packet;
+    private WsPacket packet;
 
-    public PacketWrapper(Packet packet) {
+    public WsPacketWrapper(WsPacket packet) {
         this.packet = packet;
     }
 
@@ -23,10 +23,10 @@ public class PacketWrapper {
         add("fr.supermax_8.endertranslate.core.communication.packets");
     }};
 
-    public static class Adapter implements JsonSerializer<PacketWrapper>, JsonDeserializer<PacketWrapper> {
+    public static class Adapter implements JsonSerializer<WsPacketWrapper>, JsonDeserializer<WsPacketWrapper> {
 
         @Override
-        public PacketWrapper deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        public WsPacketWrapper deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject jsonObject = null;
             String type = null;
             for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().asMap().entrySet()) {
@@ -34,16 +34,16 @@ public class PacketWrapper {
                 jsonObject = entry.getValue().getAsJsonObject();
                 break;
             }
-            Class<? extends Packet> packetClass = getPacketClass(type);
-            Packet packet = context.deserialize(jsonObject, packetClass);
+            Class<? extends WsPacket> packetClass = getPacketClass(type);
+            WsPacket packet = context.deserialize(jsonObject, packetClass);
 
-            return new PacketWrapper(packet);
+            return new WsPacketWrapper(packet);
         }
 
         @Override
-        public JsonElement serialize(PacketWrapper src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(WsPacketWrapper src, Type typeOfSrc, JsonSerializationContext context) {
             JsonObject object = new JsonObject();
-            Packet packet = src.packet;
+            WsPacket packet = src.packet;
             String packetName = packet.getClass().getSimpleName();
             JsonElement valueElement = context.serialize(packet);
 
@@ -51,11 +51,11 @@ public class PacketWrapper {
             return object;
         }
 
-        private Class<? extends Packet> getPacketClass(String className) {
+        private Class<? extends WsPacket> getPacketClass(String className) {
             for (String packageName : packageNameOfPackets) {
                 try {
                     String fullClassName = packageName + "." + className;
-                    return Class.forName(fullClassName).asSubclass(Packet.class);
+                    return Class.forName(fullClassName).asSubclass(WsPacket.class);
                 } catch (ClassNotFoundException ignored) {
                 }
             }

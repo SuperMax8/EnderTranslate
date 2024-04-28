@@ -16,6 +16,10 @@ public class LanguageManager {
     private final ConcurrentHashMap<String, Language> languages = new ConcurrentHashMap<>();
 
     public LanguageManager(Map<String, Language> languages) {
+        languages.forEach((id, language) -> {
+            languages.put(id, language);
+            languagesIds.add(id);
+        });
         instance = this;
     }
 

@@ -7,8 +7,8 @@ import com.velocitypowered.api.plugin.Plugin;
 import org.slf4j.Logger;
 
 @Plugin(
-        id = "endertranslate-velocity",
-        name = "endertranslate-velocity",
+        id = "endertranslate",
+        name = "EnderTranslate",
         version = "0.1.0"
 )
 public class EndertranslateVelocity {
@@ -18,5 +18,10 @@ public class EndertranslateVelocity {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+
     }
+
+
+
+
 }

@@ -1,4 +1,4 @@
-name: Endertranslate-Bungee
+name: EnderTranslate
 version: '${project.version}'
 main: fr.supermax_8.endertranslate.bungee.EndertranslateBungee
 author: SuperMax_8

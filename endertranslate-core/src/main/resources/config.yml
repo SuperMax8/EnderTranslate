@@ -15,11 +15,12 @@ mainServer: true
 secret: ""
 
 # If mainServer is true, port of the websocket
-wsPort: "8080"
+wsPort: 8080
+wsUrl: "ws://localhost:8080"
 
 # Default language when a player connect
 defaultLanguage: english
 
 languages:
-#  english:
-#    title: "§7English"
+  english:
+    title: "§7English"

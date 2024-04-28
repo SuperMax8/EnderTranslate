@@ -12,6 +12,10 @@
     <name>EnderTranslate</name>
     <modules>
         <module>endertranslate-core</module>
+        <module>endertranslate-paper</module>
+        <module>endertranslate-bungee</module>
+        <module>endertranslate-velocity</module>
+        <module>compile</module>
     </modules>
 
     <properties>
@@ -66,6 +70,10 @@
                                 <relocation>
                                     <pattern>dev.dejvokep.boostedyaml</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.boostedyaml</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.tcoded</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.folialib</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

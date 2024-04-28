@@ -2,8 +2,8 @@ package fr.supermax_8.endertranslate.core.language;
 
 public class Language {
 
-    private String id;
-    private String title;
+    private final String id;
+    private final String title;
 
 
     public Language(String id, String title) {

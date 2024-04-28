@@ -1,6 +1,7 @@
 package fr.supermax_8.endertranslate.core.translation;
 
 import com.google.gson.Gson;
+import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.language.LanguageManager;
 import lombok.Getter;
 
@@ -22,26 +23,35 @@ public class TranslationManager {
 
     public TranslationManager(File translationFolder) {
         instance = this;
+        EnderTranslate.log("Loading translations...");
         try {
-            Files.find(translationFolder.toPath(), Integer.MAX_VALUE, (path, att) -> path.toFile().getName().endsWith(".json")).forEach(path -> {
+            Files.walk(translationFolder.toPath()).filter(p -> p.toFile().getName().endsWith(".json")).forEach(path -> {
                 try {
                     load(path.toFile());
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
+                    EnderTranslate.log("Loading translation file: " + path.toFile().getName());
+                } catch (Exception e) {
+                    EnderTranslate.log("§cCan't load file " + path);
+                    e.printStackTrace();
                 }
             });
         } catch (Exception e) {
+            e.printStackTrace();
         }
+        EnderTranslate.log(translations.size() + " translation loaded");
+    }
+
+    public Translation getTranslation(String placeholder) {
+        return translations.get(placeholder);
     }
 
     private void load(File file) throws FileNotFoundException {
         TranslationFile translationFile = new Gson().fromJson(new FileReader(file), TranslationFile.class);
-        translationFile.translationEntries.forEach((translationId, entry) -> {
+        translationFile.entries.forEach((translationId, entry) -> {
             // Fill the map with all languages
             HashMap<String, String> translationsMap = new LinkedHashMap<>();
             for (String lId : LanguageManager.getInstance().getLanguages()) translationsMap.put(lId, null);
 
-            translationsMap.putAll(entry.translations);
+            translationsMap.putAll(entry);
 
             // Get the translation and add them in the same order as the languages config
             ArrayList<String> translations = new ArrayList<>();
@@ -53,12 +63,11 @@ public class TranslationManager {
         });
     }
 
-    private static class TranslationFile {
-        LinkedHashMap<String, TranslationEntry> translationEntries;
+    public static class TranslationFile {
+        LinkedHashMap<String, LinkedHashMap<String, String>> entries;
 
-
-        private static class TranslationEntry {
-            LinkedHashMap<String, String> translations;
+        public TranslationFile(LinkedHashMap<String, LinkedHashMap<String, String>> entries) {
+            this.entries = entries;
         }
     }
 

@@ -1,0 +1,11 @@
+name: EnderTranslate
+version: '${project.version}'
+main: fr.supermax_8.endertranslate.paper.EndertranslatePaper
+api-version: '1.16'
+folia-supported: true
+authors:
+  - SuperMax_8
+description: Translate your server, with text packet translations
+commands:
+  language:
+    description: Change your language as player

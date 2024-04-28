@@ -2,6 +2,7 @@ package fr.supermax_8.endertranslate.core;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
+import dev.dejvokep.boostedyaml.route.Route;
 import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
@@ -31,22 +32,25 @@ public class EnderTranslateConfig {
     private boolean mainServer;
     private String secret;
     private int wsPort;
+    private String wsUrl;
 
     private String defaultLanguage;
     private LinkedHashMap<String, Language> languages = new LinkedHashMap<>();
 
-    public EnderTranslateConfig(File configFile) {
+    public EnderTranslateConfig(File dataFolder) {
+        this.dataFolder = dataFolder;
+        dataFolder.mkdirs();
         try {
-            load(configFile);
+            load(new File(dataFolder, "config.yml"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        EnderTranslate.log("Config loaded");
         instance = this;
     }
 
     private void load(File configFile) throws IOException {
         boolean modified = false;
-        dataFolder = configFile.getParentFile();
 
         YamlDocument config = YamlDocument.create(
                 configFile,
@@ -54,13 +58,14 @@ public class EnderTranslateConfig {
                 GeneralSettings.builder().build(),
                 LoaderSettings.builder().setAutoUpdate(true).build(),
                 DumperSettings.builder().build(),
-                UpdaterSettings.builder().build()
+                UpdaterSettings.builder().addIgnoredRoute("0", Route.fromString("languages")).build()
         );
 
 
         mainServer = config.getBoolean("mainServer");
         secret = config.getString("secret");
         wsPort = config.getInt("wsPort");
+        wsUrl = config.getString("wsUrl");
 
         defaultLanguage = config.getString("defaultLanguage");
 
