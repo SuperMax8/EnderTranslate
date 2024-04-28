@@ -2,7 +2,6 @@ package fr.supermax_8.endertranslate.core;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
-import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
@@ -12,9 +11,16 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import com.github.retrooper.packetevents.util.adventure.AdventureSerializer;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import fr.supermax_8.endertranslate.core.communication.PacketWrapper;
+import fr.supermax_8.endertranslate.core.communication.WebSocket;
+import fr.supermax_8.endertranslate.core.language.LanguageManager;
+import fr.supermax_8.endertranslate.core.translation.TranslationManager;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -24,11 +30,31 @@ import java.util.function.Supplier;
 public class EnderTranslate {
 
     @Getter
-
     private static EnderTranslate instance;
+    @Getter
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(PacketWrapper.class, new PacketWrapper.Adapter())
+            .create();
 
-    public EnderTranslate() {
+    private EnderTranslateConfig config;
+    private LanguageManager languageManager;
+    private TranslationManager translationManager;
+    private WebSocket webSocket;
+
+    public EnderTranslate(File pluginDir) {
         instance = this;
+
+        config = new EnderTranslateConfig(pluginDir.getAbsoluteFile());
+        languageManager = new LanguageManager(config.getLanguages());
+        File translationFolder = new File(pluginDir, "translations");
+        if (!translationFolder.exists()) translationFolder.mkdirs();
+        translationManager = new TranslationManager(translationFolder);
+
+        if (config.isMainServer()) {
+            webSocket = new WebSocket(config.getWsPort());
+            initPackets();
+        }
+
     }
 
     private void initPackets() {

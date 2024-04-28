@@ -1,3 +1,5 @@
-name: Endertranslate-Velocity
+name: Endertranslate-Bungee
 version: '${project.version}'
 main: fr.supermax_8.endertranslate.bungee.EndertranslateBungee
+author: SuperMax_8
+description: Translation plugin

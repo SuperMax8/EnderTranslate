@@ -21,7 +21,7 @@ public final class EndertranslateBungee extends Plugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
-        new EnderTranslate();
+        new EnderTranslate(getDataFolder());
 
         PacketEvents.getAPI().init();
     }
