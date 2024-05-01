@@ -1,5 +1,6 @@
 package fr.supermax_8.endertranslate.core.language;
 
+import fr.supermax_8.endertranslate.core.EnderTranslate;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -12,14 +13,13 @@ public class LanguageManager {
     @Getter
     private static LanguageManager instance;
 
-    private final ArrayList<String> languagesIds = new ArrayList<>();
-    private final ConcurrentHashMap<String, Language> languages = new ConcurrentHashMap<>();
+    private final ArrayList<String> languagesIds;
+    private final ConcurrentHashMap<String, Language> languages;
 
     public LanguageManager(Map<String, Language> languages) {
-        languages.forEach((id, language) -> {
-            languages.put(id, language);
-            languagesIds.add(id);
-        });
+        this.languages = new ConcurrentHashMap<>(languages);
+        languagesIds = new ArrayList<>(languages.keySet());
+        EnderTranslate.log("Languages initialized");
         instance = this;
     }
 
@@ -33,6 +33,10 @@ public class LanguageManager {
 
     public List<String> getLanguages() {
         return languagesIds;
+    }
+
+    public ConcurrentHashMap<String, Language> getLanguageMap() {
+        return languages;
     }
 
 }

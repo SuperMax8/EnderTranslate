@@ -2,11 +2,12 @@ package fr.supermax_8.endertranslate.core.communication;
 
 import com.google.gson.JsonSyntaxException;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
+import fr.supermax_8.endertranslate.core.communication.packets.EditorAuthPacket;
+import fr.supermax_8.endertranslate.core.communication.packets.ServerAuthPacket;
 import io.javalin.Javalin;
 import lombok.Getter;
 import org.eclipse.jetty.websocket.api.Session;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,11 +21,7 @@ public class WebSocketServer {
     private final Javalin server;
 
     public WebSocketServer(int port) {
-        Javalin app = Javalin.create(config -> {
-            config.jetty.modifyWebSocketServletFactory(wsConfig -> {
-                wsConfig.setIdleTimeout(Duration.ZERO);
-            });
-        }).start(port);
+        Javalin app = Javalin.create().start(port);
 
         instance = this;
         EnderTranslate.log("Starting websocket server...");
@@ -39,9 +36,17 @@ public class WebSocketServer {
             });
             wsConfig.onMessage((ctx) -> {
                 try {
+                    Session session = ctx.session;
                     WsPacketWrapper packet = EnderTranslate.getGson().fromJson(ctx.message(), WsPacketWrapper.class);
+                    if (sessions.get(session).isEmpty() && (!(packet.getPacket() instanceof ServerAuthPacket) && !(packet.getPacket() instanceof EditorAuthPacket))) {
+                        EnderTranslate.log("§cIncorrect packet !");
+                        session.close();
+                        return;
+                    }
                     packet.getPacket().receiveFromClient(ctx.session, this);
-                } catch (JsonSyntaxException e) {
+                } catch (JsonSyntaxException ignored) {
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         });

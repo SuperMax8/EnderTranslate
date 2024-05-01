@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TranslationManager {
@@ -20,8 +21,10 @@ public class TranslationManager {
     private static TranslationManager instance;
 
     private final ConcurrentHashMap<String, Translation> translations = new ConcurrentHashMap<>();
+    private final File translationFolder;
 
     public TranslationManager(File translationFolder) {
+        this.translationFolder = translationFolder;
         instance = this;
         EnderTranslate.log("Loading translations...");
         try {
@@ -38,10 +41,30 @@ public class TranslationManager {
             e.printStackTrace();
         }
         EnderTranslate.log(translations.size() + " translation loaded");
+        getAllFilesPaths();
     }
 
     public Translation getTranslation(String placeholder) {
         return translations.get(placeholder);
+    }
+
+    public List<String> getAllFilesPaths() {
+        List<String> paths = new ArrayList<>();
+        try {
+            Files.walk(translationFolder.toPath()).filter(p -> p.toFile().getName().endsWith(".json") || p.toFile().isDirectory() && !p.equals(translationFolder.toPath())).forEach(path -> {
+                String absolutePath = path.toFile().getAbsolutePath();
+                try {
+                    String cleanPath = absolutePath.substring(absolutePath.indexOf("translations") + "translations/".length());
+                    paths.add(cleanPath);
+                } catch (Exception e) {
+                    System.out.println(absolutePath);
+                    System.out.println(absolutePath.indexOf("translations"));
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return paths;
     }
 
     private void load(File file) throws FileNotFoundException {

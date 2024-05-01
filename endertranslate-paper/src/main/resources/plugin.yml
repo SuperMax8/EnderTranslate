@@ -8,4 +8,11 @@ authors:
 description: Translate your server, with text packet translations
 commands:
   language:
+    aliases:
+      - lang
     description: Change your language as player
+  endertranslate:
+    aliases:
+      - et
+    permission: endertranslate.admin
+    description: Admin command of EnderTranslate

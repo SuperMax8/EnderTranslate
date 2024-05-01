@@ -25,6 +25,8 @@ public class LangCommand implements CommandExecutor {
         Language language = manager.getLanguage(languageId);
         if (language == null) {
             p.sendMessage("§cInvalid language");
+            for (String l : manager.getLanguages()) p.sendMessage(s);
+            p.sendMessage(manager.getLanguageMap().toString());
             return false;
         }
 

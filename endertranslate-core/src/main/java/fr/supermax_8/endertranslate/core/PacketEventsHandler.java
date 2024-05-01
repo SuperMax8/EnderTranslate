@@ -2,6 +2,7 @@ package fr.supermax_8.endertranslate.core;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
@@ -10,6 +11,7 @@ import com.github.retrooper.packetevents.protocol.nbt.*;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import com.github.retrooper.packetevents.util.adventure.AdventureSerializer;
+import com.github.retrooper.packetevents.wrapper.configuration.client.WrapperConfigClientSettings;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.translation.Translation;
@@ -21,20 +23,28 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PacketEventsHandler {
 
-    private final Function<Object, UUID> playerObjectToUUIDFunction;
+    private final String startTag, endTag;
 
-    public PacketEventsHandler(Function<Object, UUID> playerObjectToUUIDFunction) {
-        this.playerObjectToUUIDFunction = playerObjectToUUIDFunction;
+    public PacketEventsHandler(String startTag, String endTag) {
+        this.startTag = startTag;
+        this.endTag = endTag;
         initPackets();
     }
 
     private void initPackets() {
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract() {
+            @Override
+            public void onPacketReceive(PacketReceiveEvent e) {
+                if (e.getPacketType() == PacketType.Configuration.Client.CLIENT_SETTINGS) {
+                    WrapperConfigClientSettings packet = new WrapperConfigClientSettings(e);
+                    EnderTranslate.log("Player local: " + packet.getLocale());
+                }
+            }
+
             public void onPacketSend(PacketSendEvent e) {
                 PacketTypeCommon packetType = e.getPacketType();
                 if (!(packetType instanceof PacketType.Play.Server type)) return;
@@ -197,9 +207,6 @@ public class PacketEventsHandler {
 
     public String applyTranslate(UUID playerId, String toTranslate) {
         String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(playerId);
-
-        String startTag = "[lang]";
-        String endTag = "[/lang]";
         StringBuilder sb = new StringBuilder(toTranslate);
 
         int startTagIndex = sb.indexOf(startTag);

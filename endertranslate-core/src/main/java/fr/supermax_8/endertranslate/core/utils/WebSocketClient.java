@@ -6,18 +6,20 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.*;
 
 public abstract class WebSocketClient {
 
     private final String wsUrl;
-    private final boolean autoReconnect;
+    private ScheduledExecutorService scheduler;
     private WebSocket webSocket;
 
-    public WebSocketClient(String wsUrl, boolean autoReconnect) {
+    public WebSocketClient(String wsUrl) {
         this.wsUrl = wsUrl;
-        this.autoReconnect = autoReconnect;
+    }
+
+    protected void onOpen(WebSocket webSocket) {
+        this.webSocket = webSocket;
     }
 
     protected abstract void onText(String receivedText, boolean last);
@@ -41,19 +43,30 @@ public abstract class WebSocketClient {
     }
 
     public void start() {
+        if (scheduler == null) {
+            scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.scheduleAtFixedRate(() -> {
+                if (webSocket != null) {
+                    ByteBuffer payload = ByteBuffer.wrap(new byte[]{1, 2, 3});
+                    webSocket.sendPing(payload);
+                }
+            }, 4, 10, TimeUnit.SECONDS);
+        }
         try {
+            EnderTranslate.log("Trying to start WebSocket client...");
             HttpClient client = HttpClient.newHttpClient();
             WebSocket.Builder builder = client.newWebSocketBuilder();
-            webSocket = builder.buildAsync(URI.create(wsUrl), new WebSocket.Listener() {
+            builder.buildAsync(URI.create(wsUrl), new WebSocket.Listener() {
                 @Override
                 public void onOpen(WebSocket webSocket) {
                     EnderTranslate.log("WebSocketClient started");
-                    java.net.http.WebSocket.Listener.super.onOpen(webSocket);
+                    WebSocketClient.this.onOpen(webSocket);
+                    webSocket.request(1);
                 }
 
                 @Override
                 public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
-                    WebSocketClient.this.onText((String) data, last);
+                    WebSocketClient.this.onText(String.valueOf(data), last);
                     return WebSocket.Listener.super.onText(webSocket, data, last);
                 }
 
@@ -64,31 +77,30 @@ public abstract class WebSocketClient {
                 }
 
                 @Override
+                public void onError(WebSocket webSocket, Throwable error) {
+                    error.printStackTrace();
+                    WebSocket.Listener.super.onError(webSocket, error);
+                }
+
+                @Override
                 public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
                     EnderTranslate.log("WebSocketClient closed: " + statusCode + " " + reason);
-                    if (autoReconnect) restart();
-                    return WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
+                    scheduler.schedule(() -> start(), 2, TimeUnit.SECONDS);
+                    return null;
                 }
             }).join();
+            if (webSocket == null) scheduler.schedule(() -> start(), 2, TimeUnit.SECONDS);
         } catch (Exception e) {
-            restart();
+            scheduler.schedule(() -> start(), 2, TimeUnit.SECONDS);
         }
     }
 
-    private void restart() {
-        CompletableFuture.runAsync(() -> {
-            EnderTranslate.log("WebSocketClient restart...");
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            start();
-        });
-    }
 
-    public void stop() {
-        webSocket.abort();
+    public void close() {
+        if (webSocket != null) {
+            webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "Goodbye");
+            scheduler.shutdown();
+        }
     }
 
 }

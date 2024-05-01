@@ -17,9 +17,6 @@ public final class EndertranslateBungee extends Plugin {
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
                 .checkForUpdates(true)
                 .bStats(true);
-
-        //On Bukkit, calling this here is essential, hence the name "load"
-        PacketEvents.getAPI().load();
     }
 
     @Override

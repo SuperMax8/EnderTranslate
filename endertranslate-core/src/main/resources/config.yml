@@ -18,6 +18,10 @@ secret: ""
 wsPort: 8080
 wsUrl: "ws://localhost:8080"
 
+# Tags used for translation placeholders, e.g. [lang]testtest[/lang]
+startTag: "[lang]"
+endTag: "[/lang]"
+
 # Default language when a player connect
 defaultLanguage: english
 

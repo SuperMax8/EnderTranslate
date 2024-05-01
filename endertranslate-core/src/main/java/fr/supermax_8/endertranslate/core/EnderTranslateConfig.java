@@ -8,6 +8,7 @@ import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import fr.supermax_8.endertranslate.core.language.Language;
+import fr.supermax_8.endertranslate.core.utils.Base64Utils;
 import fr.supermax_8.endertranslate.core.utils.ResourceUtils;
 import lombok.Data;
 import lombok.Getter;
@@ -33,6 +34,9 @@ public class EnderTranslateConfig {
     private String secret;
     private int wsPort;
     private String wsUrl;
+
+    private String startTag;
+    private String endTag;
 
     private String defaultLanguage;
     private LinkedHashMap<String, Language> languages = new LinkedHashMap<>();
@@ -67,6 +71,9 @@ public class EnderTranslateConfig {
         wsPort = config.getInt("wsPort");
         wsUrl = config.getString("wsUrl");
 
+        startTag = config.getString("startTag");
+        endTag = config.getString("endTag");
+
         defaultLanguage = config.getString("defaultLanguage");
 
         config.getSection("languages").getRouteMappedBlocks(false).forEach((route, block) -> {
@@ -76,20 +83,12 @@ public class EnderTranslateConfig {
         });
 
         if (secret == null || secret.isEmpty()) {
-            secret = generateSecuredToken(16);
+            secret = Base64Utils.generateSecuredToken(16);
             config.set("secret", secret);
             modified = true;
         }
 
         if (modified) config.save();
-    }
-
-    public static String generateSecuredToken(int length) {
-        SecureRandom random = new SecureRandom();
-        byte[] tokenBytes = new byte[length];
-        random.nextBytes(tokenBytes);
-
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
     }
 
 

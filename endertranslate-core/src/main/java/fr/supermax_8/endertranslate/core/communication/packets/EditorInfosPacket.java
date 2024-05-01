@@ -1,19 +1,21 @@
 package fr.supermax_8.endertranslate.core.communication.packets;
 
-import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.WebSocketServer;
 import fr.supermax_8.endertranslate.core.communication.WsPacket;
 import fr.supermax_8.endertranslate.core.language.Language;
 import org.eclipse.jetty.websocket.api.Session;
 
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-public class MainServerInfoPacket implements WsPacket {
+public class EditorInfosPacket implements WsPacket {
 
-    private final LinkedHashMap<String, Language> languages;
+    private List<String> translationFilesPaths;
+    private Map<String, Language> languages;
 
-    public MainServerInfoPacket(LinkedHashMap<String, Language> languages) {
+    public EditorInfosPacket(List<String> translationFilesPaths, Map<String, Language> languages) {
+        this.translationFilesPaths = translationFilesPaths;
         this.languages = languages;
     }
 
@@ -24,8 +26,7 @@ public class MainServerInfoPacket implements WsPacket {
 
     @Override
     public void receiveFromServer(ServerWebSocketClient ws) {
-        EnderTranslate.log("§aMain server info received, connection established !");
-        EnderTranslate.getInstance().initLanguages(languages);
+
     }
 
 }

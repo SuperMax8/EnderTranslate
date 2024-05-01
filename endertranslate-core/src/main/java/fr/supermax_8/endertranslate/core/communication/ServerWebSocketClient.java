@@ -2,9 +2,12 @@ package fr.supermax_8.endertranslate.core.communication;
 
 import com.google.gson.JsonSyntaxException;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
+import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
+import fr.supermax_8.endertranslate.core.communication.packets.ServerAuthPacket;
 import fr.supermax_8.endertranslate.core.utils.WebSocketClient;
 import lombok.Getter;
 
+import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
 
 public class ServerWebSocketClient extends WebSocketClient {
@@ -13,9 +16,15 @@ public class ServerWebSocketClient extends WebSocketClient {
     private static ServerWebSocketClient instance;
 
     public ServerWebSocketClient(String wsUrl) {
-        super(wsUrl, true);
+        super(wsUrl);
         start();
         instance = this;
+    }
+
+    @Override
+    protected void onOpen(WebSocket webSocket) {
+        super.onOpen(webSocket);
+        sendPacket(new ServerAuthPacket(EnderTranslateConfig.getInstance().getSecret()));
     }
 
     @Override
@@ -24,6 +33,7 @@ public class ServerWebSocketClient extends WebSocketClient {
             WsPacketWrapper packet = EnderTranslate.getGson().fromJson(receivedText, WsPacketWrapper.class);
             packet.getPacket().receiveFromServer(this);
         } catch (JsonSyntaxException e) {
+            e.printStackTrace();
         }
     }
 
