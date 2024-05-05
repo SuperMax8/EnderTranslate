@@ -7,6 +7,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 const FloatedTextInput = React.forwardRef<HTMLInputElement, InputProps>(
     ({label, ...props}, ref) => {
         const inputId = React.useId();
+
         return (
             <div>
                 <div className="relative">

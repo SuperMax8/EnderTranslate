@@ -28,3 +28,7 @@ defaultLanguage: english
 languages:
   english:
     title: "§7English"
+
+
+# NEVER CHANGE THIS VALUE
+config-version: 1

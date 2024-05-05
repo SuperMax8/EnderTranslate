@@ -2,6 +2,7 @@ package fr.supermax_8.endertranslate.core;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import dev.dejvokep.boostedyaml.route.Route;
 import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
@@ -16,8 +17,6 @@ import lombok.Getter;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.LinkedHashMap;
 
 @Data
@@ -62,7 +61,9 @@ public class EnderTranslateConfig {
                 GeneralSettings.builder().build(),
                 LoaderSettings.builder().setAutoUpdate(true).build(),
                 DumperSettings.builder().build(),
-                UpdaterSettings.builder().addIgnoredRoute("0", Route.fromString("languages")).build()
+                UpdaterSettings.builder()
+                        .setVersioning(new BasicVersioning("config-version"))
+                        .addIgnoredRoute("0", Route.fromString("languages")).build()
         );
 
 
@@ -80,6 +81,10 @@ public class EnderTranslateConfig {
             Section section = (Section) block;
             String title = section.getString("title");
             languages.put(section.getNameAsString(), new Language(section.getNameAsString(), title));
+        });
+
+        languages.keySet().forEach(s -> {
+            EnderTranslate.log("Language loaded " + s);
         });
 
         if (secret == null || secret.isEmpty()) {

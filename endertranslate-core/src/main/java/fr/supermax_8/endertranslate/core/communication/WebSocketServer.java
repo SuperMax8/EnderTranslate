@@ -35,8 +35,11 @@ public class WebSocketServer {
                 System.out.println("Session disconnected, total: " + sessions.size());
             });
             wsConfig.onMessage((ctx) -> {
+                boolean auth = false;
                 try {
+                    if (ctx.message().equals("Ping")) return;
                     Session session = ctx.session;
+                    if (sessions.get(session).isPresent()) auth = true;
                     WsPacketWrapper packet = EnderTranslate.getGson().fromJson(ctx.message(), WsPacketWrapper.class);
                     if (sessions.get(session).isEmpty() && (!(packet.getPacket() instanceof ServerAuthPacket) && !(packet.getPacket() instanceof EditorAuthPacket))) {
                         EnderTranslate.log("§cIncorrect packet !");
@@ -44,9 +47,9 @@ public class WebSocketServer {
                         return;
                     }
                     packet.getPacket().receiveFromClient(ctx.session, this);
-                } catch (JsonSyntaxException ignored) {
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if (auth)
+                        e.printStackTrace();
                 }
             });
         });

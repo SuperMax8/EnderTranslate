@@ -6,6 +6,7 @@ import fr.supermax_8.endertranslate.core.communication.*;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
 import org.eclipse.jetty.websocket.api.Session;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class EditorAuthPacket implements WsPacket {
@@ -26,7 +27,7 @@ public class EditorAuthPacket implements WsPacket {
             // Send the main server config to him
             editor.sendPacket(new EditorInfosPacket(
                     TranslationManager.getInstance().getAllFilesPaths(),
-                    EnderTranslateConfig.getInstance().getLanguages()
+                    new ArrayList<>(EnderTranslateConfig.getInstance().getLanguages().keySet())
             ));
         } else jettySession.close();
     }
