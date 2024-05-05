@@ -14,8 +14,6 @@ import fr.supermax_8.endertranslate.core.utils.Base64Utils;
 import lombok.Getter;
 
 import java.io.File;
-import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -61,8 +59,18 @@ public class EnderTranslate {
     public void reload() {
         log("§7Reloading...");
         try {
-            shutdown();
-            load();
+            config = new EnderTranslateConfig(pluginDir);
+
+            if (config.isMainServer()) {
+                languageManager = new LanguageManager(config.getLanguages());
+                File translationFolder = new File(pluginDir, "translations");
+                if (!translationFolder.exists()) translationFolder.mkdirs();
+                translationManager = new TranslationManager(translationFolder);
+
+                File playerDataFolder = new File(pluginDir, "players");
+                if (!playerDataFolder.exists()) playerDataFolder.mkdirs();
+                playerManager = new TranslatePlayerManager(playerDataFolder);
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -83,7 +91,7 @@ public class EnderTranslate {
             playerManager = new TranslatePlayerManager(playerDataFolder);
 
             webSocketServer = new WebSocketServer(config.getWsPort());
-            packetEventsHandler = new PacketEventsHandler(config.getStartTag(), config.getEndTag());
+            packetEventsHandler = new PacketEventsHandler();
         } else
             webSocketClient = new ServerWebSocketClient(config.getWsUrl());
     }

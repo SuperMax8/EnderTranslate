@@ -64,22 +64,22 @@ const FileTree: React.FC<FileTreeProps> = ({
                                                moveFileProvider
                                            }) => {
     const [paths, setPaths] = useState(initialPaths);
-/*    const [open] = useState<string[]>([])*/
+    /*    const [open] = useState<string[]>([])*/
     const [tree, setTree] = useState(() => buildTree(initialPaths));
 
     useEffect(() => {
         setTree(buildTree(paths));
     }, [paths]);
 
-/*    const reOpenFolders = () => {
-        setTimeout(() => {
-            console.log('reOpenFolders')
-            open.forEach(openPath => {
-                console.log("REloading " + openPath)
-                toggleFolder(openPath.split("/"), false);
-            })
-        }, 100)
-    }*/
+    /*    const reOpenFolders = () => {
+            setTimeout(() => {
+                console.log('reOpenFolders')
+                open.forEach(openPath => {
+                    console.log("REloading " + openPath)
+                    toggleFolder(openPath.split("/"), false);
+                })
+            }, 100)
+        }*/
 
     const addRootFile = () => {
         const newFileName = "New File.json"; // Exemple de nouveau fichier
@@ -103,7 +103,7 @@ const FileTree: React.FC<FileTreeProps> = ({
         }
         setPaths([...paths, newName]);
         createFileProvider(newName);
-/*        reOpenFolders()*/
+        /*        reOpenFolders()*/
     };
 
     const rename = (path: string, newName: string) => {
@@ -114,7 +114,6 @@ const FileTree: React.FC<FileTreeProps> = ({
         setPaths([...paths]);
         console.log("Path " + path + " NewPath: " + newPath)
         renameProvider(path, newPath);
-       /* reOpenFolders()*/
     }
 
     const toggleFolder = (nodePath: string[], save: boolean) => {
@@ -127,15 +126,6 @@ const FileTree: React.FC<FileTreeProps> = ({
         });
         current.isOpen = !current.isOpen;
         setTree(newTree); // Mise à jour de l'état de l'arbre
-        if (save) {
-            /*const nodePathString = nodePath.join("/");
-            console.log("save " + nodePathString)
-            if (current.isOpen) {
-                open.push(nodePathString)
-            } else
-                open.splice(nodePath.indexOf(nodePathString), 1)
-            console.log("open: " + open)*/
-        }
     };
 
     const moveFile = (fromPath, inFolderPath) => {
@@ -144,29 +134,6 @@ const FileTree: React.FC<FileTreeProps> = ({
         const fileName = fromPath.includes("/") ? fromPath.substring(fromPath.lastIndexOf("/") + 1, fromPath.length) : fromPath;
         const newFilePath = inFolderPath === "" ? fileName : inFolderPath + "/" + fileName;
 
-        /*        const fileDir: string = fromPath.includes("/") ? fromPath.substring(0, fromPath.indexOf("/") + 1) : "";
-
-                [...paths].forEach(path => {
-                    if (path.startsWith(fileDir) && fileDir.length > 0) {
-                        paths.splice(paths.indexOf(path), 1);
-                        paths.push(path.repla)
-                    }
-                })
-                paths.push(newFilePath);
-                console.log(paths)*/
-        if (fromPath.endsWith(".json")) {
-            paths.splice(paths.indexOf(fromPath), 1);
-            paths.push(newFilePath);
-        } else {
-            [...paths].forEach(path => {
-                if (path.startsWith(fromPath)) {
-                    paths.splice(paths.indexOf(path), 1);
-                    paths.push(inFolderPath + "/" + path.replace(fromPath, ""))
-                }
-            })
-        }
-
-        setPaths([...paths]);
         moveFileProvider(fromPath, newFilePath)
         console.log("move from " + fromPath + " to " + newFilePath);
     };
@@ -225,7 +192,9 @@ const FileTree: React.FC<FileTreeProps> = ({
             const fileName = fromPathString.includes("/") ? fromPathString.substring(fromPath.lastIndexOf("/"), fromPathString.length) : fromPathString;
             const possibleDuplicate = toPath + "/" + fileName;
 
-            return (fromPathString !== toPathString) && !toPathString.endsWith(".json") && !paths.some(el => el === possibleDuplicate);
+            console.log(fromPathString, toPathString)
+            return (fromPathString !== toPathString) && !toPathString.endsWith(".json") &&
+                !paths.some(el => el === possibleDuplicate);
         };
 
 

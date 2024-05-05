@@ -27,11 +27,7 @@ import java.util.function.Supplier;
 
 public class PacketEventsHandler {
 
-    private final String startTag, endTag;
-
-    public PacketEventsHandler(String startTag, String endTag) {
-        this.startTag = startTag;
-        this.endTag = endTag;
+    public PacketEventsHandler() {
         initPackets();
     }
 
@@ -208,6 +204,10 @@ public class PacketEventsHandler {
     public String applyTranslate(UUID playerId, String toTranslate) {
         String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(playerId);
         StringBuilder sb = new StringBuilder(toTranslate);
+
+        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+        String startTag = config.getStartTag();
+        String endTag = config.getEndTag();
 
         int startTagIndex = sb.indexOf(startTag);
         while (startTagIndex != -1) {

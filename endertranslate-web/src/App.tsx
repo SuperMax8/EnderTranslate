@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/collapsible.tsx"
 import {Button} from "@/components/ui/button.tsx";
 import {Label} from "@/components/ui/label.tsx";
-import {ChevronsUpDown, File, X} from "lucide-react";
+import {ChevronsUpDown, File, Settings, X} from "lucide-react";
 import FileTree from "@/components/FileTree.tsx";
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable.tsx";
 import {TranslationEntry, TranslationFile} from "@/TranslationFile.tsx";
@@ -20,6 +20,8 @@ import {
     AlertDialogHeader,
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog.tsx";
+import {useToast} from "@/components/ui/use-toast.tsx";
+import {Toaster} from "@/components/ui/toaster.tsx";
 
 let ws: WebSocket;
 let languages: Array<string>;
@@ -248,13 +250,30 @@ const App: React.FC = () => {
         }
     }, [])
 
+    const {toast} = useToast()
+
     return (
         <div className="flex flex-row h-screen bg-background">
             <ResizablePanelGroup direction="horizontal">
                 <ResizablePanel defaultSize={20} minSize={15} maxSize={50}>
                     <div className="bg-background border-r-2 border-accent h-full">
-                        <div className="mx-5 max-w-[30rem]">
-                            <img src={textlogo}></img>
+                        <div className="flex items-center justify-center flex-col pb-14">
+                            <div className="mx-5 max-w-[30rem]">
+                                <img src={textlogo}></img>
+                            </div>
+                            <div className="">
+                                <Button className="w-fit" onClick={() => {
+                                    ws.send(JSON.stringify({
+                                        "ReloadPluginPacket": {}
+                                    }))
+                                    toast({
+                                        title: "Plugin reloaded !"
+                                    })
+                                    console.log("Plugin reloaded")
+                                }}>
+                                    Reload Plugin <Settings/>
+                                </Button>
+                            </div>
                         </div>
                         <ScrollArea className="h-full">
                             <FileTree key={paths.join(';')} initialPaths={paths}
@@ -345,6 +364,7 @@ const App: React.FC = () => {
                                          deleteEntry={deleteEntry}/>
                 </ResizablePanel>
             </ResizablePanelGroup>
+            <Toaster />
         </div>
     );
 };
