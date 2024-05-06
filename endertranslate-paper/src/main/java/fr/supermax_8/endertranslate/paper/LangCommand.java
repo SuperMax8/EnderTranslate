@@ -2,6 +2,7 @@ package fr.supermax_8.endertranslate.paper;
 
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
+import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.packets.PlayerChangeLanguagePacket;
@@ -53,6 +54,7 @@ public class LangCommand implements CommandExecutor, TabCompleter {
         }
         EndertranslatePaper.getInstance().getScheduler().runLater(() -> {
             p.updateInventory();
+            p.sendMessage(EnderTranslateConfig.getInstance().getStartTag() + "endertranslate_langchange{" + language + "}" + EnderTranslateConfig.getInstance().getEndTag());
         }, 5);
     }
 
@@ -67,7 +69,7 @@ public class LangCommand implements CommandExecutor, TabCompleter {
         int rows = (int) Math.ceil(LanguageManager.getInstance().getLanguageMap().size() / 9f);
 
         Gui gui = Gui.gui()
-                .title(Component.text("Choose language"))
+                .title(Component.text(EnderTranslateConfig.getInstance().getStartTag() + "endertranslate_chooselang" + EnderTranslateConfig.getInstance().getEndTag()))
                 .rows(rows)
                 .create();
 

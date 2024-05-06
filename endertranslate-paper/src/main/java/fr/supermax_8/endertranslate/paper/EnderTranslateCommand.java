@@ -4,6 +4,7 @@ import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.packets.ReloadPluginPacket;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -12,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,7 +46,7 @@ public class EnderTranslateCommand implements CommandExecutor, TabCompleter {
                             .decorate(TextDecoration.UNDERLINED)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.openUrl(url));
-                    commandSender.sendMessage(text);
+                    BukkitAudiences.create(EndertranslatePaper.getInstance()).player((Player) commandSender).sendMessage(text);
                 }
                 default -> sendHelp(commandSender);
             }

@@ -55,7 +55,15 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <!--<relocations>
+                            <relocations>
+                                <relocation>
+                                    <pattern>dev.dejvokep.boostedyaml</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.boostedyaml</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.tcoded</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.folialib</shadedPattern>
+                                </relocation>
                                 <relocation>
                                     <pattern>com.github.retrooper.packetevents</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.api</shadedPattern>
@@ -65,18 +73,14 @@
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.impl</shadedPattern>
                                 </relocation>
                                 <relocation>
+                                    <pattern>dev.triumphteam</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.triumphteam</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>net.kyori</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.kyori</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>dev.dejvokep.boostedyaml</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.boostedyaml</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.tcoded</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.folialib</shadedPattern>
-                                </relocation>
-                            </relocations>-->
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>

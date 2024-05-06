@@ -18,10 +18,7 @@ import fr.supermax_8.endertranslate.core.translation.Translation;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
 import net.kyori.adventure.text.Component;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -213,10 +210,40 @@ public class PacketEventsHandler {
         while (startTagIndex != -1) {
             int endTagIndex = sb.indexOf(endTag, startTagIndex);
             if (endTagIndex == -1) break;
-            String langPlaceholder = sb.substring(startTagIndex + startTag.length(), endTagIndex);
-            Translation translation = TranslationManager.getInstance().getTranslation(langPlaceholder);
-            String translatedPlaceholder = translation == null ? "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND" : translation.getTranslation(playerLanguage);
-            sb.replace(startTagIndex, endTagIndex + endTag.length(), translatedPlaceholder);
+            int startLangPlaceholderIndex = startTagIndex + startTag.length();
+            String langPlaceholder = sb.substring(startLangPlaceholderIndex, endTagIndex);
+            int startParamIndex = langPlaceholder.indexOf("{");
+            String[] params = null;
+            if (startParamIndex != -1) {
+                params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
+                langPlaceholder = langPlaceholder.substring(0, startParamIndex);
+            }
+
+            String endValue;
+
+            getEndValue:
+            {
+                Translation translation = TranslationManager.getInstance().getTranslation(langPlaceholder);
+                if (translation == null) {
+                    endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
+                    break getEndValue;
+                }
+                String translationValue = translation.getTranslation(playerLanguage);
+                if (params == null) endValue = translationValue;
+                else {
+                    StringBuilder translationValueBuilder = new StringBuilder(translationValue);
+                    int i = 0;
+                    for (String param : params) {
+                        int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
+                        if (paramIndex == -1) break;
+                        translationValueBuilder.replace(paramIndex, paramIndex + 3, param);
+                        i++;
+                    }
+                    endValue = translationValueBuilder.toString();
+                }
+            }
+
+            sb.replace(startTagIndex, endTagIndex + endTag.length(), endValue);
 
             startTagIndex = sb.indexOf(startTag);
         }

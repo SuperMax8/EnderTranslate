@@ -3,12 +3,11 @@ package fr.supermax_8.endertranslate.core.translation;
 import com.google.gson.Gson;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.language.LanguageManager;
+import fr.supermax_8.endertranslate.core.utils.ResourceUtils;
 import lombok.Getter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -26,6 +25,15 @@ public class TranslationManager {
     public TranslationManager(File translationFolder) {
         this.translationFolder = translationFolder;
         instance = this;
+        File enderTranslate = new File(translationFolder, "EnderTranslate.json");
+        if (!enderTranslate.exists()) {
+            EnderTranslate.log("Create default plugin translation file");
+            try {
+                writeResourceToFile("EnderTranslate.json", enderTranslate.getAbsolutePath());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         EnderTranslate.log("Loading translations...");
         try {
             Files.walk(translationFolder.toPath()).filter(p -> p.toFile().getName().endsWith(".json")).forEach(path -> {
@@ -42,6 +50,23 @@ public class TranslationManager {
         }
         EnderTranslate.log(translations.size() + " translation loaded");
         getAllFilesPaths();
+    }
+
+    public void writeResourceToFile(String resourcePath, String outputPath) {
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+
+        // Charger la ressource
+        try (InputStream resourceStream = ResourceUtils.getResourceAsStream(resourcePath);
+             OutputStream fileOutputStream = new FileOutputStream(outputPath)) {
+
+            // Lire les données de la ressource et les écrire dans le fichier
+            while ((bytesRead = resourceStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void load(File file) throws FileNotFoundException {

@@ -23,7 +23,7 @@ public class BannerUtils {
             String[] split = pattern.split(";");
             meta.addPattern(new Pattern(DyeColor.values()[Integer.parseInt(split[1])], PatternType.getByIdentifier(split[0])));
         }
-        meta.displayName(Component.text(title));
+        meta.setDisplayName(title);
         meta.addItemFlags(ItemFlag.values());
         banner.setItemMeta(meta);
         return banner;
