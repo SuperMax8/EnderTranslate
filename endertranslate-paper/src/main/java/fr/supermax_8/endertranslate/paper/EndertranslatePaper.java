@@ -29,8 +29,9 @@ public final class EndertranslatePaper extends JavaPlugin {
 
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
-                .checkForUpdates(true)
-                .bStats(true);
+                .checkForUpdates(false)
+                .bStats(false);
+        PacketEvents.getAPI().load();
     }
 
 

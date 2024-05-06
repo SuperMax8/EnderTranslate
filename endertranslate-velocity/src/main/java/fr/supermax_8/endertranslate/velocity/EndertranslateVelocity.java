@@ -2,9 +2,10 @@ package fr.supermax_8.endertranslate.velocity;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.google.inject.Inject;
-import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -22,30 +23,33 @@ import java.nio.file.Path;
 )
 public class EndertranslateVelocity {
 
-    @Inject
     private Logger logger;
 
     private EnderTranslate enderTranslate;
 
     private ProxyServer proxyServer;
+    private PluginContainer pluginContainer;
     private Path dataDirectory;
 
     @Inject
-    public EndertranslateVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
-        this.proxyServer = server;
+    public EndertranslateVelocity(Logger logger, ProxyServer proxyServer, PluginContainer pluginContainer, @DataDirectory Path dataDirectory) {
+        this.proxyServer = proxyServer;
+        this.pluginContainer = pluginContainer;
         this.dataDirectory = dataDirectory;
+        this.logger = logger;
 
         long elapsedTime = ETLoader.loadLibs(dataDirectory.toFile());
         System.out.println("Libs loaded in " + elapsedTime + " ms");
+
+        PacketEvents.setAPI(VelocityPacketEventsBuilder.build(proxyServer, pluginContainer, logger, dataDirectory));
+        PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
+                .checkForUpdates(false)
+                .bStats(false);
+        PacketEvents.getAPI().load();
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        PacketEvents.setAPI(VelocityPacketEventsBuilder.build(proxyServer, proxyServer.getPluginManager().fromInstance(this).get(), logger, dataDirectory));
-        PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
-                .checkForUpdates(true)
-                .bStats(true);
-
         enderTranslate = new EnderTranslate(
                 dataDirectory.toFile(),
                 obj -> ((Player) obj).getUniqueId(),

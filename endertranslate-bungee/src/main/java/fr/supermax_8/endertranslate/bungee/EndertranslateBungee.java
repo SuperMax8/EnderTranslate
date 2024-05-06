@@ -19,8 +19,9 @@ public final class EndertranslateBungee extends Plugin {
 
         PacketEvents.setAPI(BungeePacketEventsBuilder.build(this));
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
-                .checkForUpdates(true)
+                .checkForUpdates(false)
                 .bStats(false);
+        PacketEvents.getAPI().load();
     }
 
     @Override

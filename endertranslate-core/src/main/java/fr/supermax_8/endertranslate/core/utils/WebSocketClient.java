@@ -89,18 +89,17 @@ public abstract class WebSocketClient {
                     return null;
                 }
             }).join();
-            if (webSocket == null) scheduler.schedule(() -> start(), 2, TimeUnit.SECONDS);
+            if (webSocket == null) scheduler.schedule(this::start, 2, TimeUnit.SECONDS);
         } catch (Exception e) {
-            scheduler.schedule(() -> start(), 2, TimeUnit.SECONDS);
+            scheduler.schedule(this::start, 2, TimeUnit.SECONDS);
         }
     }
 
 
     public void close() {
-        if (webSocket != null) {
+        scheduler.shutdown();
+        if (webSocket != null)
             webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "Goodbye");
-            scheduler.shutdown();
-        }
     }
 
 }

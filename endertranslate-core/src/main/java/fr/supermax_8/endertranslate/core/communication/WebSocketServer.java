@@ -1,6 +1,5 @@
 package fr.supermax_8.endertranslate.core.communication;
 
-import com.google.gson.JsonSyntaxException;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.communication.packets.EditorAuthPacket;
 import fr.supermax_8.endertranslate.core.communication.packets.ServerAuthPacket;

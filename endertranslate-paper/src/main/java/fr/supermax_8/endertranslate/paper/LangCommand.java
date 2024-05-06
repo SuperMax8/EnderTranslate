@@ -2,7 +2,6 @@ package fr.supermax_8.endertranslate.paper;
 
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
-import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.packets.PlayerChangeLanguagePacket;
