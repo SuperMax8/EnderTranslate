@@ -28,11 +28,11 @@ public class WebSocketServer {
         server = app.ws("/", wsConfig -> {
             wsConfig.onConnect(ctx -> {
                 sessions.put(ctx.session, Optional.empty());
-                System.out.println("New session connected, total: " + sessions.size());
+                //System.out.println("New session connected, total: " + sessions.size());
             });
             wsConfig.onClose(ctx -> {
                 sessions.remove(ctx.session);
-                System.out.println("Session disconnected, total: " + sessions.size());
+                //System.out.println("Session disconnected, total: " + sessions.size());
             });
             wsConfig.onMessage((ctx) -> {
                 boolean auth = false;

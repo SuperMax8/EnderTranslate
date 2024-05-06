@@ -3,6 +3,7 @@ package fr.supermax_8.endertranslate.paper;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.tcoded.folialib.FoliaLib;
 import com.tcoded.folialib.impl.ServerImplementation;
+import fr.supermax_8.endertranslate.core.ETLoader;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import lombok.Getter;
@@ -23,6 +24,9 @@ public final class EndertranslatePaper extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        long elapsedTime = ETLoader.loadLibs(getDataFolder());
+
+
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
                 .checkForUpdates(true)

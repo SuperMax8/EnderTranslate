@@ -1,5 +1,6 @@
 package fr.supermax_8.endertranslate.core.communication.packets;
 
+import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.WebSocketServer;
@@ -25,7 +26,7 @@ public class ServerAuthPacket implements WsPacket {
             socket.getSessions().put(jettySession, Optional.of(server));
 
             // Send the main server config to him
-            server.sendPacket(new MainServerInfoPacket(EnderTranslateConfig.getInstance().getLanguages()));
+            server.sendPacket(new MainServerInfoPacket(EnderTranslateConfig.getInstance().getLanguages(), EnderTranslate.getInstance().getEditorSecret()));
         } else jettySession.close();
     }
 

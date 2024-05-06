@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 @Data
 public class EnderTranslateConfig {
@@ -37,6 +38,7 @@ public class EnderTranslateConfig {
     private String startTag;
     private String endTag;
 
+    private String editorURL;
     private String defaultLanguage;
     private LinkedHashMap<String, Language> languages = new LinkedHashMap<>();
 
@@ -75,12 +77,15 @@ public class EnderTranslateConfig {
         startTag = config.getString("startTag");
         endTag = config.getString("endTag");
 
+        editorURL = config.getString("editorURL");
         defaultLanguage = config.getString("defaultLanguage");
 
         config.getSection("languages").getRouteMappedBlocks(false).forEach((route, block) -> {
             Section section = (Section) block;
             String title = section.getString("title");
-            languages.put(section.getNameAsString(), new Language(section.getNameAsString(), title));
+            String material = section.getString("material");
+            List<String> patterns = section.getStringList("patterns");
+            languages.put(section.getNameAsString(), new Language(section.getNameAsString(), title, material, patterns));
         });
 
         languages.keySet().forEach(s -> {

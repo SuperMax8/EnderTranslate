@@ -1,6 +1,7 @@
 package fr.supermax_8.endertranslate.bungee;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import fr.supermax_8.endertranslate.core.ETLoader;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import io.github.retrooper.packetevents.bungee.factory.BungeePacketEventsBuilder;
 import net.md_5.bungee.api.ProxyServer;
@@ -13,10 +14,13 @@ public final class EndertranslateBungee extends Plugin {
 
     @Override
     public void onLoad() {
+        long elapsedTime = ETLoader.loadLibs(getDataFolder());
+
+
         PacketEvents.setAPI(BungeePacketEventsBuilder.build(this));
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
                 .checkForUpdates(true)
-                .bStats(true);
+                .bStats(false);
     }
 
     @Override

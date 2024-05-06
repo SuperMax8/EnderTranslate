@@ -12,6 +12,7 @@ import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
 import fr.supermax_8.endertranslate.core.utils.Base64Utils;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class EnderTranslate {
     private PacketEventsHandler packetEventsHandler;
 
     @Getter
+    @Setter
     private String editorSecret = Base64Utils.generateSecuredToken(8);
 
     public EnderTranslate(File pluginDir, Function<Object, UUID> playerObjectToUUIDFunction, Consumer<String> log) {
@@ -50,7 +52,7 @@ public class EnderTranslate {
         this.pluginDir = pluginDir;
         this.playerObjectToUUIDFunction = playerObjectToUUIDFunction;
         log("§7Loading...");
-        editorSecret = "dev";
+        /*editorSecret = "dev";*/
         load();
         log("§aLoaded");
         instance = this;
@@ -108,6 +110,9 @@ public class EnderTranslate {
 
     public void initLanguages(Map<String, Language> languages) {
         languageManager = new LanguageManager(languages);
+        languageManager.getLanguageMap().values().forEach(l -> {
+            System.out.println(l);
+        });
     }
 
 

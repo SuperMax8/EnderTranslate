@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +19,7 @@ public class TranslationManager {
     @Getter
     private static TranslationManager instance;
 
+    @Getter
     private final ConcurrentHashMap<String, Translation> translations = new ConcurrentHashMap<>();
     private final File translationFolder;
 

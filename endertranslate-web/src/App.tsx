@@ -275,7 +275,7 @@ const App: React.FC = () => {
                                 </Button>
                             </div>
                         </div>
-                        <ScrollArea className="h-full">
+                        <ScrollArea className="h-full max-h-[65%] pb-14">
                             <FileTree key={paths.join(';')} initialPaths={paths}
                                       onFileClick={(e) => {
                                           currentPagePath = e.join('/');

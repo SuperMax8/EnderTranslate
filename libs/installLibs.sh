@@ -15,5 +15,7 @@ echo -e "Maven path: $mavenPath\e[39m"
 "$mavenPath" install:install-file -Dfile=$jarsPath/packetevents-api-2.2.1.jar -DgroupId=com.github.retrooper.packetevents -DartifactId=api -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
 "$mavenPath" install:install-file -Dfile=$jarsPath/packetevents-bungeecord-2.2.1.jar -DgroupId=com.github.retrooper.packetevents -DartifactId=bungeecord -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
 "$mavenPath" install:install-file -Dfile=$jarsPath/packetevents-spigot-2.2.1.jar -DgroupId=com.github.retrooper.packetevents -DartifactId=spigot -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
+"$mavenPath" install:install-file -Dfile=$jarsPath/packetevents-velocity-2.2.1.jar -DgroupId=com.github.retrooper.packetevents -DartifactId=velocity -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
+
 
 echo -e "\e[92mOperation complete."

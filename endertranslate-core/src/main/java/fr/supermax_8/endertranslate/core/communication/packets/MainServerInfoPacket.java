@@ -12,9 +12,11 @@ import java.util.LinkedHashMap;
 public class MainServerInfoPacket implements WsPacket {
 
     private final LinkedHashMap<String, Language> languages;
+    private final String editorSecret;
 
-    public MainServerInfoPacket(LinkedHashMap<String, Language> languages) {
+    public MainServerInfoPacket(LinkedHashMap<String, Language> languages, String editorSecret) {
         this.languages = languages;
+        this.editorSecret = editorSecret;
     }
 
     @Override
@@ -26,6 +28,7 @@ public class MainServerInfoPacket implements WsPacket {
     public void receiveFromServer(ServerWebSocketClient ws) {
         EnderTranslate.log("§aMain server info received, connection established !");
         EnderTranslate.getInstance().initLanguages(languages);
+        EnderTranslate.getInstance().setEditorSecret(editorSecret);
     }
 
 }

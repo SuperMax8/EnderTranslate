@@ -16,7 +16,8 @@ public class Translation {
     }
 
     public String getTranslation(String language) {
-        return translations.get(languageManager.languageIndex(language));
+        int index = languageManager.languageIndex(language);
+        return translations.size() - 1 > index ? translations.get(0) : translations.get(index);
     }
 
 }
