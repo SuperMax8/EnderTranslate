@@ -19,7 +19,7 @@ import java.nio.file.Path;
 @Plugin(
         id = "endertranslate",
         name = "EnderTranslate",
-        version = "0.1.0"
+        version = "1.0.0"
 )
 public class EndertranslateVelocity {
 

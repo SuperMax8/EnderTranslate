@@ -6,7 +6,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <groupId>fr.supermax_8.endertranslate</groupId>
@@ -19,7 +19,7 @@
     </properties>
 
     <build>
-        <finalName>EnderTranslate</finalName>
+        <finalName>EnderTranslate-${version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -60,22 +60,22 @@
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
-            <version>0.1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>fr.supermax_8.endertranslate</groupId>
             <artifactId>paper</artifactId>
-            <version>0.1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>fr.supermax_8.endertranslate</groupId>
             <artifactId>endertranslate-bungee</artifactId>
-            <version>0.1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>fr.supermax_8.endertranslate</groupId>
             <artifactId>velocity</artifactId>
-            <version>0.1.0</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

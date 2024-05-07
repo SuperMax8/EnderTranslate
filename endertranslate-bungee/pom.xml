@@ -6,7 +6,7 @@
 
     <groupId>fr.supermax_8.endertranslate</groupId>
     <artifactId>endertranslate-bungee</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Endertranslate-Bungee</name>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
-            <version>0.1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper.packetevents</groupId>

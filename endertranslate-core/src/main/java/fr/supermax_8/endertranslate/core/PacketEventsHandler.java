@@ -206,6 +206,8 @@ public class PacketEventsHandler {
         String startTag = config.getStartTag();
         String endTag = config.getEndTag();
 
+        TranslationManager translationManager = TranslationManager.getInstance();
+
         int startTagIndex = sb.indexOf(startTag);
         while (startTagIndex != -1) {
             int endTagIndex = sb.indexOf(endTag, startTagIndex);
@@ -223,7 +225,7 @@ public class PacketEventsHandler {
 
             getEndValue:
             {
-                Translation translation = TranslationManager.getInstance().getTranslation(langPlaceholder);
+                Translation translation = translationManager.getTranslation(langPlaceholder);
                 if (translation == null) {
                     endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
                     break getEndValue;
@@ -236,7 +238,8 @@ public class PacketEventsHandler {
                     for (String param : params) {
                         int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
                         if (paramIndex == -1) break;
-                        translationValueBuilder.replace(paramIndex, paramIndex + 3, param);
+                        Translation paramTranslation = translationManager.getTranslation(param);
+                        translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
                         i++;
                     }
                     endValue = translationValueBuilder.toString();
