@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>fr.supermax_8.endertranslate</groupId>
-    <artifactId>paper</artifactId>
+    <artifactId>spigot</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>endertranslate-paper</name>
+    <name>endertranslate-spigot</name>
 
     <properties>
         <java.version>1.8</java.version>
@@ -78,10 +78,6 @@
 
     <repositories>
         <repository>
-            <id>papermc-repo</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-        <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
@@ -93,9 +89,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

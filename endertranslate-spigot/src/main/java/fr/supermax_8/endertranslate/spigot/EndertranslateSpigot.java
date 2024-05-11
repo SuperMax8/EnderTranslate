@@ -1,4 +1,4 @@
-package fr.supermax_8.endertranslate.paper;
+package fr.supermax_8.endertranslate.spigot;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.tcoded.folialib.FoliaLib;
@@ -11,10 +11,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class EndertranslatePaper extends JavaPlugin {
+public final class EndertranslateSpigot extends JavaPlugin {
 
     @Getter
-    private static EndertranslatePaper instance;
+    private static EndertranslateSpigot instance;
 
     private EnderTranslate enderTranslate;
     @Getter

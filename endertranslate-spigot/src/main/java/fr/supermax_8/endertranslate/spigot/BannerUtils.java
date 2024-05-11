@@ -1,4 +1,4 @@
-package fr.supermax_8.endertranslate.paper;
+package fr.supermax_8.endertranslate.spigot;
 
 
 import net.kyori.adventure.text.Component;

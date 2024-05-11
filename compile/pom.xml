@@ -65,7 +65,7 @@
         </dependency>
         <dependency>
             <groupId>fr.supermax_8.endertranslate</groupId>
-            <artifactId>paper</artifactId>
+            <artifactId>spigot</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>

@@ -1,4 +1,4 @@
-package fr.supermax_8.endertranslate.paper;
+package fr.supermax_8.endertranslate.spigot;
 
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
@@ -33,7 +33,7 @@ public class EnderTranslateCommand implements CommandExecutor, TabCompleter {
                         if (!EnderTranslateConfig.getInstance().isMainServer())
                             ServerWebSocketClient.getInstance().sendPacket(new ReloadPluginPacket());
 
-                        EndertranslatePaper.getInstance().getScheduler().runLaterAsync(() -> {
+                        EndertranslateSpigot.getInstance().getScheduler().runLaterAsync(() -> {
                             EnderTranslate.getInstance().reload();
                             commandSender.sendMessage("§aEnderTranslate Reloaded !");
                         }, 2);
@@ -46,7 +46,7 @@ public class EnderTranslateCommand implements CommandExecutor, TabCompleter {
                             .decorate(TextDecoration.UNDERLINED)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.openUrl(url));
-                    BukkitAudiences.create(EndertranslatePaper.getInstance()).player((Player) commandSender).sendMessage(text);
+                    BukkitAudiences.create(EndertranslateSpigot.getInstance()).player((Player) commandSender).sendMessage(text);
                 }
                 default -> sendHelp(commandSender);
             }

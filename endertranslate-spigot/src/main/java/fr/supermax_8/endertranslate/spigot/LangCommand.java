@@ -1,4 +1,4 @@
-package fr.supermax_8.endertranslate.paper;
+package fr.supermax_8.endertranslate.spigot;
 
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -51,7 +51,7 @@ public class LangCommand implements CommandExecutor, TabCompleter {
             CompletableFuture.runAsync(() ->
                     ServerWebSocketClient.getInstance().sendPacket(new PlayerChangeLanguagePacket(p.getUniqueId(), language)));
         }
-        EndertranslatePaper.getInstance().getScheduler().runLater(() -> {
+        EndertranslateSpigot.getInstance().getScheduler().runLater(() -> {
             p.updateInventory();
             p.sendMessage(EnderTranslateConfig.getInstance().getStartTag() + "endertranslate_langchange{" + language + "}" + EnderTranslateConfig.getInstance().getEndTag());
         }, 5);

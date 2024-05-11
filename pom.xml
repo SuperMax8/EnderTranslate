@@ -12,7 +12,7 @@
     <name>EnderTranslate</name>
     <modules>
         <module>endertranslate-core</module>
-        <module>endertranslate-paper</module>
+        <module>endertranslate-spigot</module>
         <module>endertranslate-bungee</module>
         <module>endertranslate-velocity</module>
         <module>compile</module>
