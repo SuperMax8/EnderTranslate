@@ -73,12 +73,15 @@ public class LangCommand implements CommandExecutor, TabCompleter {
                 .create();
 
         LanguageManager.getInstance().getLanguageMap().values().forEach(l -> {
-            gui.addItem(new GuiItem(BannerUtils.getBanner(l.getTitle(), l.getMaterial(), l.getPatterns())));
+            gui.addItem(new GuiItem(BannerUtils.getBanner(l.getTitle(), l.getMaterial(), l.getPatterns()), e -> {
+                e.setCancelled(true);
+                setLanguage(p, l.getId());
+                p.closeInventory();
+            }));
         });
-        gui.setDefaultTopClickAction(ac -> {
-            ac.setCancelled(true);
-            setLanguage(p, LanguageManager.getInstance().getLanguages().get(ac.getSlot()));
-            p.closeInventory();
+
+        gui.setDefaultTopClickAction(e -> {
+            e.setCancelled(true);
         });
 
         gui.open(p);

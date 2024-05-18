@@ -6,7 +6,11 @@
 
     <groupId>fr.supermax_8.endertranslate</groupId>
     <artifactId>velocity</artifactId>
-    <version>1.0.0</version>
+    <parent>
+        <groupId>fr.supermax_8</groupId>
+        <artifactId>endertranslate</artifactId>
+        <version>1.0.1</version>
+    </parent>
     <packaging>jar</packaging>
 
     <name>EnderTranslate</name>
@@ -183,12 +187,12 @@
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper.packetevents</groupId>
             <artifactId>velocity</artifactId>
-            <version>2.2.1</version>
+            <version>2.3.1</version>
         </dependency>
     </dependencies>
 </project>

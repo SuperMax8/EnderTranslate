@@ -42,7 +42,7 @@ public class EnderTranslateCommand implements CommandExecutor, TabCompleter {
                 case "editor" -> {
                     EnderTranslateConfig config = EnderTranslateConfig.getInstance();
                     String url = config.getEditorURL() + "?ws=" + config.getWsUrl() + "&secret=" + EnderTranslate.getInstance().getEditorSecret();
-                    TextComponent text = Component.text("§7Editor link")
+                    TextComponent text = Component.text("§6Click here to open the Editor !")
                             .decorate(TextDecoration.UNDERLINED)
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.openUrl(url));
