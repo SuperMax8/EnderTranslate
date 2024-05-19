@@ -7,7 +7,6 @@ import fr.supermax_8.endertranslate.core.utils.ResourceUtils;
 import lombok.Getter;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -48,8 +47,20 @@ public class TranslationManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        EnderTranslate.log(translations.size() + " translation loaded");
-        getAllFilesPaths();
+
+        if (!EnderTranslate.isVerified() && translations.size() > 15) {
+            EnderTranslate.log("§cYou have exceeded the limit of the FREE version only the first 15 translations will be loaded ! Consider buying the plugin");
+            int count = 0;
+            HashMap<String, Translation> first15 = new HashMap<>();
+            for (Map.Entry<String, Translation> entry : translations.entrySet()) {
+                if (count > 15) break;
+                first15.put(entry.getKey(), entry.getValue());
+                count++;
+            }
+            translations.clear();
+            translations.putAll(first15);
+        } else
+            EnderTranslate.log(translations.size() + " translation loaded");
     }
 
     public void writeResourceToFile(String resourcePath, String outputPath) {

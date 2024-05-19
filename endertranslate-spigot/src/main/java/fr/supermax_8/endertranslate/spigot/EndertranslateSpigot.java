@@ -45,6 +45,7 @@ public final class EndertranslateSpigot extends JavaPlugin {
         );
         getCommand("language").setExecutor(new LangCommand());
         getCommand("endertranslate").setExecutor(new EnderTranslateCommand());
+        getServer().getPluginManager().registerEvents(new ChatListener(), this);
 
         PacketEvents.getAPI().init();
     }

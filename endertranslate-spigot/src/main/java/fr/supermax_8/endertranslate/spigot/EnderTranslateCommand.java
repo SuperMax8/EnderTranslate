@@ -58,7 +58,7 @@ public class EnderTranslateCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(new String[]{
-                "§8[§d§lEnderTranslate§8]",
+                "§8[§d§lEnderTranslate§8] " + (EnderTranslate.isVerified() ? "§6§lPremium" : "§aFree (limited to 15 translation)"),
                 "§8Made by SuperMax_8",
                 "§7- /endertranslate reload §fReload the plugin & the main server plugin if proxy config",
                 "§7- /endertranslate editor §fSend a link to the editor (data is save automatically)"

@@ -4,6 +4,10 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage;
+import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19;
+import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19_1;
+import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19_3;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.item.ItemStack;
@@ -45,6 +49,24 @@ public class PacketEventsHandler {
                     case SYSTEM_CHAT_MESSAGE -> {
                         WrapperPlayServerSystemChatMessage packet = new WrapperPlayServerSystemChatMessage(e);
                         applyTranslateOnPacketSend(e, packet::getMessage, packet::setMessage);
+                    }
+                    case CHAT_MESSAGE -> {
+                        WrapperPlayServerChatMessage packet = new WrapperPlayServerChatMessage(e);
+                        ChatMessage message = packet.getMessage();
+                        if (message instanceof ChatMessage_v1_19_3 cm) {
+                            Optional<Component> unsigned = cm.getUnsignedChatContent();
+                            if (unsigned.isEmpty()) applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                            else applyTranslateOnPacketSend(e, unsigned::get, cm::setUnsignedChatContent);
+                        } else if (message instanceof ChatMessage_v1_19_1 cm) {
+                            Component unsigned = cm.getUnsignedChatContent();
+                            if (unsigned == null) applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                            applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
+                        } else if (message instanceof ChatMessage_v1_19 cm) {
+                            Component unsigned = cm.getUnsignedChatContent();
+                            if (unsigned == null) applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                            applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
+                        } else
+                            applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
                     }
                     case ACTION_BAR -> {
                         WrapperPlayServerActionBar packet = new WrapperPlayServerActionBar(e);
@@ -182,6 +204,7 @@ public class PacketEventsHandler {
     public void applyTranslateOnPacketSendString(PacketSendEvent e, Supplier<String> getMessage, Consumer<String> setMessage) {
         String translated = applyTranslate(e.getUser().getUUID(), getMessage.get());
         if (translated != null) {
+            System.out.println("Translated " + translated);
             setMessage.accept(translated);
             e.markForReEncode(true);
         }
@@ -226,11 +249,11 @@ public class PacketEventsHandler {
             getEndValue:
             {
                 Translation translation = translationManager.getTranslation(langPlaceholder);
-                if (translation == null) {
+                String translationValue;
+                if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null) {
                     endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
                     break getEndValue;
                 }
-                String translationValue = translation.getTranslation(playerLanguage);
                 if (params == null) endValue = translationValue;
                 else {
                     StringBuilder translationValueBuilder = new StringBuilder(translationValue);

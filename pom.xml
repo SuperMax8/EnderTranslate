@@ -6,7 +6,7 @@
 
     <groupId>fr.supermax_8</groupId>
     <artifactId>endertranslate</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
 
     <name>EnderTranslate</name>
@@ -15,8 +15,9 @@
         <module>endertranslate-spigot</module>
         <module>endertranslate-bungee</module>
         <module>endertranslate-velocity</module>
-        <module>compile</module>
         <module>libsCompile</module>
+        <module>compilefree</module>
+        <module>compile</module>
     </modules>
 
     <properties>

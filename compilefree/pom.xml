@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>fr.supermax_8.endertranslate</groupId>
-    <artifactId>compile</artifactId>
+    <artifactId>compilefree</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -19,7 +19,7 @@
     </properties>
 
     <build>
-        <finalName>EnderTranslate-${version}</finalName>
+        <finalName>EnderTranslate[FREE]-${version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -79,6 +79,5 @@
             <version>1.0.2</version>
         </dependency>
     </dependencies>
-
 
 </project>
