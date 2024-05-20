@@ -6,6 +6,13 @@ folia-supported: true
 authors:
   - SuperMax_8
 description: Translate your server, with text packet translations
+softdepend:
+  - ProtocolLib
+  - ProtocolSupport
+  - ViaVersion
+  - ViaBackwards
+  - ViaRewind
+  - Geyser-Spigot
 commands:
   language:
     aliases:
