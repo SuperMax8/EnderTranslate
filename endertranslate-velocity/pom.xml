@@ -9,7 +9,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </parent>
     <packaging>jar</packaging>
 
@@ -187,7 +187,7 @@
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper.packetevents</groupId>

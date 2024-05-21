@@ -14,6 +14,8 @@ import com.github.retrooper.packetevents.protocol.item.ItemStack;
 import com.github.retrooper.packetevents.protocol.nbt.*;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
+import com.github.retrooper.packetevents.protocol.score.FixedScoreFormat;
+import com.github.retrooper.packetevents.protocol.score.ScoreFormat;
 import com.github.retrooper.packetevents.util.adventure.AdventureSerializer;
 import com.github.retrooper.packetevents.wrapper.configuration.client.WrapperConfigClientSettings;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
@@ -55,15 +57,18 @@ public class PacketEventsHandler {
                         ChatMessage message = packet.getMessage();
                         if (message instanceof ChatMessage_v1_19_3 cm) {
                             Optional<Component> unsigned = cm.getUnsignedChatContent();
-                            if (unsigned.isEmpty()) applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                            if (unsigned.isEmpty())
+                                applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
                             else applyTranslateOnPacketSend(e, unsigned::get, cm::setUnsignedChatContent);
                         } else if (message instanceof ChatMessage_v1_19_1 cm) {
                             Component unsigned = cm.getUnsignedChatContent();
-                            if (unsigned == null) applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                            if (unsigned == null)
+                                applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
                             applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
                         } else if (message instanceof ChatMessage_v1_19 cm) {
                             Component unsigned = cm.getUnsignedChatContent();
-                            if (unsigned == null) applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                            if (unsigned == null)
+                                applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
                             applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
                         } else
                             applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
@@ -128,17 +133,41 @@ public class PacketEventsHandler {
                     }
                     case SCOREBOARD_OBJECTIVE -> {
                         WrapperPlayServerScoreboardObjective packet = new WrapperPlayServerScoreboardObjective(e);
+                        applyTranslateOnPacketSendString(e, packet::getName, packet::setName);
                         applyTranslateOnPacketSend(e, packet::getDisplayName, packet::setDisplayName);
+                        applyTranslateOnScoreboardFormat(e, packet.getScoreFormat(), packet::setScoreFormat);
+                    }
+                    case RESET_SCORE -> {
+                        WrapperPlayServerResetScore packet = new WrapperPlayServerResetScore(e);
+                        applyTranslateOnPacketSendString(e, packet::getObjective, packet::setObjective);
+                        applyTranslateOnPacketSendString(e, packet::getTargetName, packet::setTargetName);
                     }
                     case UPDATE_SCORE -> {
                         WrapperPlayServerUpdateScore packet = new WrapperPlayServerUpdateScore(e);
                         applyTranslateOnPacketSendString(e, packet::getObjectiveName, packet::setObjectiveName);
+                        applyTranslateOnPacketSendString(e, packet::getEntityName, packet::setEntityName);
+                        applyTranslateOnScoreboardFormat(e, packet.getScoreFormat(), packet::setScoreFormat);
+                        applyTranslateOnPacketSend(e, packet::getEntityDisplayName, packet::setEntityDisplayName);
+                    }
+                    case TEAMS -> {
+                        WrapperPlayServerTeams packet = new WrapperPlayServerTeams(e);
+                        applyTranslateOnPacketSendString(e, packet::getTeamName, packet::setTeamName);
+                        packet.getTeamInfo().ifPresent(scoreBoardTeamInfo -> {
+                            applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getDisplayName, scoreBoardTeamInfo::setDisplayName);
+                            applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getPrefix, scoreBoardTeamInfo::setPrefix);
+                            applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getSuffix, scoreBoardTeamInfo::setSuffix);
+                        });
                     }
                 }
             }
         });
     }
 
+    public void applyTranslateOnScoreboardFormat(PacketSendEvent e, ScoreFormat format, Consumer<ScoreFormat> setFormat) {
+        if (!(format instanceof FixedScoreFormat fixedScoreFormat)) return;
+        applyTranslateOnPacketSend(e, fixedScoreFormat::getValue, component ->
+                setFormat.accept(new FixedScoreFormat(component)));
+    }
 
     public void applyTranslateOnItemStacks(PacketSendEvent e, Collection<ItemStack> stacks) {
         for (ItemStack stack : stacks)
@@ -204,7 +233,6 @@ public class PacketEventsHandler {
     public void applyTranslateOnPacketSendString(PacketSendEvent e, Supplier<String> getMessage, Consumer<String> setMessage) {
         String translated = applyTranslate(e.getUser().getUUID(), getMessage.get());
         if (translated != null) {
-            System.out.println("Translated " + translated);
             setMessage.accept(translated);
             e.markForReEncode(true);
         }
