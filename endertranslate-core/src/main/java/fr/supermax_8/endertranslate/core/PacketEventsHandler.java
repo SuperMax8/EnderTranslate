@@ -241,10 +241,10 @@ public class PacketEventsHandler {
     public void applyTranslateOnPacketSend(PacketSendEvent e, Supplier<Component> getMessage, Consumer<Component> setMessage) {
         Component toTranslate = getMessage.get();
         if (toTranslate == null) return;
-        String message = AdventureSerializer.toLegacyFormat(toTranslate);
+        String message = AdventureSerializer.toJson(toTranslate);
         String translated = applyTranslate(e.getUser().getUUID(), message);
         if (translated != null) {
-            setMessage.accept(AdventureSerializer.fromLegacyFormat(translated));
+            setMessage.accept(AdventureSerializer.parseComponent(translated));
             e.markForReEncode(true);
         }
     }

@@ -6,7 +6,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
     </parent>
 
     <groupId>fr.supermax_8.endertranslate</groupId>
@@ -61,22 +61,22 @@
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
         <dependency>
             <groupId>fr.supermax_8.endertranslate</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
         <dependency>
             <groupId>fr.supermax_8.endertranslate</groupId>
             <artifactId>endertranslate-bungee</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
         <dependency>
             <groupId>fr.supermax_8.endertranslate</groupId>
             <artifactId>velocity</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
     </dependencies>
 

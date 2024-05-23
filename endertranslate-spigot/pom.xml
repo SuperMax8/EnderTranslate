@@ -10,7 +10,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
     </parent>
     <name>endertranslate-spigot</name>
 
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
         <dependency>
             <groupId>com.tcoded</groupId>
