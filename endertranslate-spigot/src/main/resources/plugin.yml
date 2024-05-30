@@ -7,6 +7,7 @@ authors:
   - SuperMax_8
 description: Translate your server, with text packet translations
 softdepend:
+  - PlaceholderAPI
   - ProtocolLib
   - ProtocolSupport
   - ViaVersion

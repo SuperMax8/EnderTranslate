@@ -34,6 +34,8 @@ const TranslationComp: React.FC<{ entry: TranslationEntry, deleteEntry: (entry: 
                                                                                                                     entry,
                                                                                                                     deleteEntry
                                                                                                                 }) => {
+
+
     console.log(languages)
     return (
         <div className="p-5 rounded-md bg-accent flex flex-row gap-4 relative">
@@ -43,6 +45,7 @@ const TranslationComp: React.FC<{ entry: TranslationEntry, deleteEntry: (entry: 
                         <div className="w-1/4">
                             <FloatedTextInput label="Translation Id" defaultValue={entry.id}
                                               onChange={e => {
+                                                  e.target.value = e.target.value.replace(/\./g, "_");
                                                   entry.id = e.target.value;
                                                   saveTranslation()
                                               }}/>

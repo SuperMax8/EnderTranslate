@@ -6,9 +6,11 @@ import com.google.gson.GsonBuilder;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.WebSocketServer;
 import fr.supermax_8.endertranslate.core.communication.WsPacketWrapper;
+import fr.supermax_8.endertranslate.core.communication.packets.MainServerInfoPacket;
 import fr.supermax_8.endertranslate.core.language.Language;
 import fr.supermax_8.endertranslate.core.language.LanguageManager;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
+import fr.supermax_8.endertranslate.core.translation.Translation;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
 import fr.supermax_8.endertranslate.core.utils.Base64Utils;
 import fr.supermax_8.endertranslate.core.utils.CryptographyUtils;
@@ -54,7 +56,7 @@ public class EnderTranslate {
 
         boolean verif = false;
         String value;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(ResourceUtils.getResourceAsStream("PREMIUM")))){
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(ResourceUtils.getResourceAsStream("PREMIUM")))) {
             value = br.readLine();
             verif = CryptographyUtils.verify(value, premiumSign, publicKey);
         } catch (Exception e) {
@@ -91,6 +93,13 @@ public class EnderTranslate {
                 File playerDataFolder = new File(pluginDir, "players");
                 if (!playerDataFolder.exists()) playerDataFolder.mkdirs();
                 playerManager = new TranslatePlayerManager(playerDataFolder);
+
+                webSocketServer.getSessions().values().forEach(opt -> opt.ifPresent(wsSession ->
+                        wsSession.sendPacket(new MainServerInfoPacket(
+                                EnderTranslateConfig.getInstance().getLanguages(),
+                                TranslationManager.getInstance().getTranslations(),
+                                EnderTranslate.getInstance().getEditorSecret()
+                        ))));
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -113,8 +122,10 @@ public class EnderTranslate {
 
             webSocketServer = new WebSocketServer(config.getWsPort());
             packetEventsHandler = new PacketEventsHandler();
-        } else
+        } else {
+            playerManager = new TranslatePlayerManager();
             webSocketClient = new ServerWebSocketClient(config.getWsUrl());
+        }
     }
 
     public void shutdown() {
@@ -127,11 +138,11 @@ public class EnderTranslate {
         PacketEvents.getAPI().getEventManager().unregisterAllListeners();
     }
 
-    public void initLanguages(Map<String, Language> languages) {
+    public void initAsSubServer(Map<String, Language> languages, Map<String, Translation> translations) {
         languageManager = new LanguageManager(languages);
-        languageManager.getLanguageMap().values().forEach(l -> {
-            System.out.println(l);
-        });
+        languageManager.getLanguageMap().values().forEach(System.out::println);
+        translationManager.getTranslations().clear();
+        translationManager.getTranslations().putAll(translations);
     }
 
 

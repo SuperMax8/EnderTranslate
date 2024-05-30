@@ -26,7 +26,6 @@ public final class EndertranslateSpigot extends JavaPlugin {
     public void onLoad() {
         long elapsedTime = ETLoader.loadLibs(getDataFolder());
 
-
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
                 .checkForUpdates(false)
@@ -43,9 +42,15 @@ public final class EndertranslateSpigot extends JavaPlugin {
                 obj -> ((Player) obj).getUniqueId(),
                 s -> Bukkit.getConsoleSender().sendMessage(s)
         );
+
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceholderManager().register();
+            EnderTranslate.log("PlaceholderAPI hook init !");
+        }
+
         getCommand("language").setExecutor(new LangCommand());
         getCommand("endertranslate").setExecutor(new EnderTranslateCommand());
-        getServer().getPluginManager().registerEvents(new ChatListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
         PacketEvents.getAPI().init();
     }

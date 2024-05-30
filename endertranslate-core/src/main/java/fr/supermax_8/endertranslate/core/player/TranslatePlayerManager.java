@@ -17,7 +17,11 @@ public class TranslatePlayerManager {
     private static TranslatePlayerManager instance;
     private static String defaultLanguage = EnderTranslateConfig.getInstance().getDefaultLanguage();
     private ConcurrentHashMap<UUID, TranslatePlayer> players = new ConcurrentHashMap<>();
-    private final File playerDataFolder;
+    private File playerDataFolder;
+
+    public TranslatePlayerManager() {
+
+    }
 
     public TranslatePlayerManager(File playerDataFolder) {
         this.playerDataFolder = playerDataFolder;
@@ -33,20 +37,18 @@ public class TranslatePlayerManager {
     }
 
     public void setPlayerLanguage(UUID playerId, String newLanguage) {
-        TranslatePlayer player = players.get(playerId);
-        File playerDataFile = new File(playerDataFolder, playerId + ".json");
-        if (player == null) {
-            player = new TranslatePlayer(defaultLanguage);
-            players.put(playerId, player);
-        }
+        TranslatePlayer player = players.computeIfAbsent(playerId, k -> new TranslatePlayer(defaultLanguage));
         player.setSelectedLanguage(newLanguage);
 
-        // Update file
-        try (FileWriter writer = new FileWriter(playerDataFile)) {
-            writer.write(EnderTranslate.getGson().toJson(player));
-        } catch (IOException e) {
-            System.out.println("An error occurred while writing JSON to the file: " + e.getMessage());
-            e.printStackTrace();
+        if (playerDataFolder != null) {
+            File playerDataFile = new File(playerDataFolder, playerId + ".json");
+            // Update file
+            try (FileWriter writer = new FileWriter(playerDataFile)) {
+                writer.write(EnderTranslate.getGson().toJson(player));
+            } catch (IOException e) {
+                System.out.println("An error occurred while writing JSON to the file: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 

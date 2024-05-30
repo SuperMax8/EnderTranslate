@@ -10,7 +10,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.0.5</version>
+        <version>1.1.1</version>
     </parent>
     <name>endertranslate-spigot</name>
 
@@ -88,6 +88,10 @@
             <id>devmart-other</id>
             <url>https://nexuslite.gcnt.net/repos/other/</url>
         </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -100,7 +104,7 @@
         <dependency>
             <groupId>fr.supermax_8</groupId>
             <artifactId>endertranslate-core</artifactId>
-            <version>1.0.5</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.tcoded</groupId>
@@ -129,5 +133,13 @@
             <artifactId>adventure-platform-bukkit</artifactId>
             <version>4.3.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
+
 </project>

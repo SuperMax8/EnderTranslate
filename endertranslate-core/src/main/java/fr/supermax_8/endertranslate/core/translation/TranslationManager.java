@@ -3,6 +3,7 @@ package fr.supermax_8.endertranslate.core.translation;
 import com.google.gson.Gson;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.language.LanguageManager;
+import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.utils.ResourceUtils;
 import lombok.Getter;
 
@@ -19,7 +20,11 @@ public class TranslationManager {
 
     @Getter
     private final ConcurrentHashMap<String, Translation> translations = new ConcurrentHashMap<>();
-    private final File translationFolder;
+    private File translationFolder;
+
+    public TranslationManager() {
+
+    }
 
     public TranslationManager(File translationFolder) {
         this.translationFolder = translationFolder;

@@ -45,9 +45,8 @@ public class LangCommand implements CommandExecutor, TabCompleter {
     }
 
     private void setLanguage(Player p, String language) {
-        if (EnderTranslateConfig.getInstance().isMainServer()) {
-            TranslatePlayerManager.getInstance().setPlayerLanguage(p.getUniqueId(), language);
-        } else {
+        TranslatePlayerManager.getInstance().setPlayerLanguage(p.getUniqueId(), language);
+        if (!EnderTranslateConfig.getInstance().isMainServer()) {
             CompletableFuture.runAsync(() ->
                     ServerWebSocketClient.getInstance().sendPacket(new PlayerChangeLanguagePacket(p.getUniqueId(), language)));
         }

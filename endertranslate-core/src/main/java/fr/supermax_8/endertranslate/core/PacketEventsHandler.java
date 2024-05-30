@@ -22,6 +22,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.*;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.translation.Translation;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 
 import java.util.*;
@@ -30,7 +31,11 @@ import java.util.function.Supplier;
 
 public class PacketEventsHandler {
 
+    @Getter
+    private static PacketEventsHandler instance;
+
     public PacketEventsHandler() {
+        instance = this;
         initPackets();
     }
 
@@ -257,53 +262,66 @@ public class PacketEventsHandler {
         String startTag = config.getStartTag();
         String endTag = config.getEndTag();
 
-        TranslationManager translationManager = TranslationManager.getInstance();
-
         int startTagIndex = sb.indexOf(startTag);
         while (startTagIndex != -1) {
             int endTagIndex = sb.indexOf(endTag, startTagIndex);
             if (endTagIndex == -1) break;
             int startLangPlaceholderIndex = startTagIndex + startTag.length();
+
             String langPlaceholder = sb.substring(startLangPlaceholderIndex, endTagIndex);
-            int startParamIndex = langPlaceholder.indexOf("{");
-            String[] params = null;
-            if (startParamIndex != -1) {
-                params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
-                langPlaceholder = langPlaceholder.substring(0, startParamIndex);
-            }
-
-            String endValue;
-
-            getEndValue:
-            {
-                Translation translation = translationManager.getTranslation(langPlaceholder);
-                String translationValue;
-                if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null) {
-                    endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
-                    break getEndValue;
-                }
-                if (params == null) endValue = translationValue;
-                else {
-                    StringBuilder translationValueBuilder = new StringBuilder(translationValue);
-                    int i = 0;
-                    for (String param : params) {
-                        int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
-                        if (paramIndex == -1) break;
-                        Translation paramTranslation = translationManager.getTranslation(param);
-                        translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
-                        i++;
-                    }
-                    endValue = translationValueBuilder.toString();
-                }
-            }
+            String endValue = translatePlaceholder(langPlaceholder, playerLanguage);
 
             sb.replace(startTagIndex, endTagIndex + endTag.length(), endValue);
-
             startTagIndex = sb.indexOf(startTag);
         }
 
         String translatedMessage = sb.toString();
         return translatedMessage.equals(toTranslate) ? null : translatedMessage;
+    }
+
+    /**
+     * Translate placeholder with params
+     * @param langPlaceholder the placeholder e.g hello_chat{aaaa;bb}
+     * @param playerLanguage
+     * @return
+     */
+    public String translatePlaceholder(String langPlaceholder, String playerLanguage) {
+        TranslationManager translationManager = TranslationManager.getInstance();
+
+        // Load params
+        int startParamIndex = langPlaceholder.indexOf("{");
+        String[] params = null;
+        if (startParamIndex != -1) {
+            params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
+            langPlaceholder = langPlaceholder.substring(0, startParamIndex);
+        }
+
+        String endValue;
+
+        getEndValue:
+        {
+            Translation translation = translationManager.getTranslation(langPlaceholder);
+            String translationValue;
+            if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null) {
+                endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
+                break getEndValue;
+            }
+            if (params == null) endValue = translationValue;
+            else {
+                StringBuilder translationValueBuilder = new StringBuilder(translationValue);
+                int i = 0;
+                for (String param : params) {
+                    int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
+                    if (paramIndex == -1) break;
+                    Translation paramTranslation = translationManager.getTranslation(param);
+                    translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
+                    i++;
+                }
+                endValue = translationValueBuilder.toString();
+            }
+        }
+
+        return endValue;
     }
 
 }
