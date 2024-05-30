@@ -123,6 +123,7 @@ public class EnderTranslate {
             webSocketServer = new WebSocketServer(config.getWsPort());
             packetEventsHandler = new PacketEventsHandler();
         } else {
+            translationManager = new TranslationManager();
             playerManager = new TranslatePlayerManager();
             webSocketClient = new ServerWebSocketClient(config.getWsUrl());
         }

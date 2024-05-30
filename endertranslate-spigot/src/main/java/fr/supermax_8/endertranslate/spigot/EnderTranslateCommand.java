@@ -47,6 +47,7 @@ public class EnderTranslateCommand implements CommandExecutor, TabCompleter {
                             .decorate(TextDecoration.BOLD)
                             .clickEvent(ClickEvent.openUrl(url));
                     BukkitAudiences.create(EndertranslateSpigot.getInstance()).player((Player) commandSender).sendMessage(text);
+                    EnderTranslate.log("Sending editor link " + url);
                 }
                 default -> sendHelp(commandSender);
             }
