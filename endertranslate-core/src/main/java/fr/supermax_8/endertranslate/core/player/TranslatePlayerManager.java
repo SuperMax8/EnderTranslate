@@ -20,7 +20,7 @@ public class TranslatePlayerManager {
     private File playerDataFolder;
 
     public TranslatePlayerManager() {
-
+        instance = this;
     }
 
     public TranslatePlayerManager(File playerDataFolder) {

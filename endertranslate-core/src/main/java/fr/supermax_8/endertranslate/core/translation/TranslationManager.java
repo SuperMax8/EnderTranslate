@@ -3,7 +3,6 @@ package fr.supermax_8.endertranslate.core.translation;
 import com.google.gson.Gson;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.language.LanguageManager;
-import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.utils.ResourceUtils;
 import lombok.Getter;
 
@@ -23,12 +22,12 @@ public class TranslationManager {
     private File translationFolder;
 
     public TranslationManager() {
-
+        instance = this;
     }
 
     public TranslationManager(File translationFolder) {
-        this.translationFolder = translationFolder;
         instance = this;
+        this.translationFolder = translationFolder;
         File enderTranslate = new File(translationFolder, "EnderTranslate.json");
         if (!enderTranslate.exists()) {
             EnderTranslate.log("Create default plugin translation file");
