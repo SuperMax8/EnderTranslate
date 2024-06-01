@@ -59,7 +59,6 @@ public final class EndertranslateSpigot extends JavaPlugin {
 
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
-                .debugMode()
                 .tickTickables()
                 .trackPlatformEntities()
                 .usePlatformLogger();

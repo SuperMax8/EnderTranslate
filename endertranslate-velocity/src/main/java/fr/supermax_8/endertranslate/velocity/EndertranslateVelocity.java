@@ -66,7 +66,6 @@ public class EndertranslateVelocity {
 
         VelocityEntityLibPlatform platform = new VelocityEntityLibPlatform(this, proxyServer);
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
-                .debugMode()
                 .tickTickables()
                 .trackPlatformEntities()
                 .usePlatformLogger();
