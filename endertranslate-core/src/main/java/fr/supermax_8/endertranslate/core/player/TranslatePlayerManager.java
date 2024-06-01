@@ -2,12 +2,14 @@ package fr.supermax_8.endertranslate.core.player;
 
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
+import fr.supermax_8.endertranslate.core.language.LanguageManager;
 import lombok.Getter;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,10 +28,15 @@ public class TranslatePlayerManager {
     public TranslatePlayerManager(File playerDataFolder) {
         this.playerDataFolder = playerDataFolder;
         try {
+            LinkedList<UUID> toResetLanguage = new LinkedList<>();
             for (File jsonFile : playerDataFolder.listFiles(f -> f.getName().endsWith(".json"))) {
                 TranslatePlayer player = EnderTranslate.getGson().fromJson(new FileReader(jsonFile), TranslatePlayer.class);
-                players.put(UUID.fromString(jsonFile.getName().replace(".json", "")), player);
+                UUID playerId = UUID.fromString(jsonFile.getName().replace(".json", ""));
+                players.put(playerId, player);
+                if (!(LanguageManager.getInstance().getLanguageMap().containsKey(player.getSelectedLanguage())))
+                    toResetLanguage.add(playerId);
             }
+            toResetLanguage.forEach(id -> setPlayerLanguage(id, defaultLanguage));
         } catch (Exception e) {
             e.printStackTrace();
         }

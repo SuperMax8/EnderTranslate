@@ -13,6 +13,7 @@ echo -e "\e[93mInstalling EnderTranslate dependencies jars from \"$jarsPath\" to
 echo -e "Maven path: $mavenPath\e[39m"
 
 "$mavenPath" install:install-file -Dfile=$jarsPath/entitylib-api-2.2.1-SNAPSHOT.jar -DgroupId=com.github.Tofaa2.EntityLib -DartifactId=api -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
+"$mavenPath" install:install-file -Dfile=$jarsPath/entitylib-spigot-2.0-SNAPSHOT.jar -DgroupId=com.github.Tofaa2.EntityLib -DartifactId=spigot -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
 "$mavenPath" install:install-file -Dfile=$jarsPath/entitylib-common-2.0-SNAPSHOT.jar -DgroupId=com.github.Tofaa2.EntityLib -DartifactId=common -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
 "$mavenPath" install:install-file -Dfile=$jarsPath/entitylib-velocity-2.0-SNAPSHOT.jar -DgroupId=com.github.Tofaa2.EntityLib -DartifactId=velocity -Dversion=2.2.1 -Dpackaging=jar -DgeneratePom=true
 "$mavenPath" install:install-file -Dfile=$jarsPath/packetevents-api-2.3.1-SNAPSHOT.jar -DgroupId=com.github.retrooper.packetevents -DartifactId=api -Dversion=2.3.1 -Dpackaging=jar -DgeneratePom=true

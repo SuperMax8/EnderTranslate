@@ -8,8 +8,6 @@ import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage;
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19;
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19_1;
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19_3;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.protocol.item.ItemStack;
@@ -28,7 +26,6 @@ import lombok.Getter;
 import me.tofaa.entitylib.meta.EntityMeta;
 import me.tofaa.entitylib.meta.Metadata;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
-import me.tofaa.entitylib.wrapper.WrapperEntity;
 import net.kyori.adventure.text.Component;
 
 import java.util.Collection;
@@ -43,7 +40,8 @@ public class PacketEventsHandler {
 
     @Getter
     private static PacketEventsHandler instance;
-    private ConcurrentHashMap<Integer, EntityType> packetEntities = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, EntityType> entitiesType = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entitiesMetaData = new ConcurrentHashMap<>();
 
     public PacketEventsHandler() {
         instance = this;
@@ -112,33 +110,39 @@ public class PacketEventsHandler {
                     }
                     case SPAWN_ENTITY -> {
                         WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(e);
-                        packetEntities.put(packet.getEntityId(), packet.getEntityType());
+                        entitiesType.put(packet.getEntityId(), packet.getEntityType());
                     }
                     case DESTROY_ENTITIES -> {
                         WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(e);
-                        for (int id : packet.getEntityIds()) packetEntities.remove(id);
+                        for (int id : packet.getEntityIds()) {
+                            entitiesType.remove(id);
+                            entitiesMetaData.remove(id);
+                        }
                     }
                     case ENTITY_METADATA -> {
-                        WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(e);
-                        int entityId = packet.getEntityId();
-                        EntityType entityType = packetEntities.get(entityId);
+                        try {
+                            WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(e);
+                            int entityId = packet.getEntityId();
+                            EntityType entityType = entitiesType.get(entityId);
 
-                        Metadata meta = new Metadata(entityId);
-                        meta.setMetaFromPacket(packet);
-                        if (entityType == EntityTypes.TEXT_DISPLAY) {
-                            TextDisplayMeta textDisplayMeta = new TextDisplayMeta(entityId, meta);
-                            applyTranslateOnPacketSend(e, textDisplayMeta::getText, comp -> {
-                                textDisplayMeta.setText(comp);
-                                packet.setEntityMetadata(textDisplayMeta.createPacket().getEntityMetadata());
-                            });
-                        } else {
-                            EntityMeta entityMeta = new EntityMeta(entityId, meta);
-                            Component name = entityMeta.getCustomName();
-                            if (name != null)
-                                applyTranslateOnPacketSend(e, () -> name, comp -> {
-                                    entityMeta.setCustomName(comp);
-                                    packet.setEntityMetadata(entityMeta.createPacket().getEntityMetadata());
+                            Metadata meta = new Metadata(entityId);
+                            meta.setMetaFromPacket(packet);
+                            if (entityType == EntityTypes.TEXT_DISPLAY) {
+                                TextDisplayMeta textDisplayMeta = new TextDisplayMeta(entityId, meta);
+                                applyTranslateOnPacketSend(e, textDisplayMeta::getText, comp -> {
+                                    textDisplayMeta.setText(comp);
+                                    packet.setEntityMetadata(textDisplayMeta.createPacket().getEntityMetadata());
                                 });
+                            } else {
+                                EntityMeta entityMeta = new EntityMeta(entityId, meta);
+                                Component name = entityMeta.getCustomName();
+                                if (name != null)
+                                    applyTranslateOnPacketSend(e, () -> name, comp -> {
+                                        entityMeta.setCustomName(comp);
+                                        packet.setEntityMetadata(entityMeta.createPacket().getEntityMetadata());
+                                    });
+                            }
+                        } catch (Exception ex) {
                         }
                     }
                     case WINDOW_ITEMS -> {

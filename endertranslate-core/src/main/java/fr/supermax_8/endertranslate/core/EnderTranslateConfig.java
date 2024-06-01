@@ -60,12 +60,12 @@ public class EnderTranslateConfig {
         YamlDocument config = YamlDocument.create(
                 configFile,
                 ResourceUtils.getResourceAsStream("config.yml"),
-                GeneralSettings.builder().build(),
+                GeneralSettings.builder().setUseDefaults(false).build(),
                 LoaderSettings.builder().setAutoUpdate(true).build(),
                 DumperSettings.builder().build(),
                 UpdaterSettings.builder()
                         .setVersioning(new BasicVersioning("config-version"))
-                        .addIgnoredRoute("0", Route.fromString("languages")).build()
+                        .addIgnoredRoute("1", "languages", '.').build()
         );
 
 
@@ -79,6 +79,8 @@ public class EnderTranslateConfig {
 
         editorURL = config.getString("editorURL");
         defaultLanguage = config.getString("defaultLanguage");
+
+        languages.clear();
 
         config.getSection("languages").getRouteMappedBlocks(false).forEach((route, block) -> {
             Section section = (Section) block;
