@@ -87,7 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -96,7 +96,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -108,6 +108,10 @@
                                 <relocation>
                                     <pattern>io.github.retrooper.packetevents</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.velocity</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.github.Tofaa2</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.entitylib</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -193,6 +197,11 @@
             <groupId>com.github.retrooper.packetevents</groupId>
             <artifactId>velocity</artifactId>
             <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>velocity</artifactId>
+            <version>2.2.1</version>
         </dependency>
     </dependencies>
 </project>

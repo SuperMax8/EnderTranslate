@@ -10,6 +10,8 @@ import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19_3;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.protocol.item.ItemStack;
 import com.github.retrooper.packetevents.protocol.nbt.*;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
@@ -23,9 +25,17 @@ import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.translation.Translation;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
 import lombok.Getter;
+import me.tofaa.entitylib.meta.EntityMeta;
+import me.tofaa.entitylib.meta.Metadata;
+import me.tofaa.entitylib.meta.display.TextDisplayMeta;
+import me.tofaa.entitylib.wrapper.WrapperEntity;
 import net.kyori.adventure.text.Component;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -33,6 +43,7 @@ public class PacketEventsHandler {
 
     @Getter
     private static PacketEventsHandler instance;
+    private ConcurrentHashMap<Integer, EntityType> packetEntities = new ConcurrentHashMap<>();
 
     public PacketEventsHandler() {
         instance = this;
@@ -99,14 +110,35 @@ public class PacketEventsHandler {
                         WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow(e);
                         applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
                     }
+                    case SPAWN_ENTITY -> {
+                        WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(e);
+                        packetEntities.put(packet.getEntityId(), packet.getEntityType());
+                    }
+                    case DESTROY_ENTITIES -> {
+                        WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(e);
+                        for (int id : packet.getEntityIds()) packetEntities.remove(id);
+                    }
                     case ENTITY_METADATA -> {
                         WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(e);
-                        for (EntityData data : packet.getEntityMetadata()) {
-                            if (data.getType() != EntityDataTypes.OPTIONAL_ADV_COMPONENT) continue;
-                            Optional<Component> name = (Optional<Component>) data.getValue();
-                            if (name.isPresent())
-                                applyTranslateOnPacketSend(e, name::get, comp -> data.setValue(Optional.of(comp)));
-                            return;
+                        int entityId = packet.getEntityId();
+                        EntityType entityType = packetEntities.get(entityId);
+
+                        Metadata meta = new Metadata(entityId);
+                        meta.setMetaFromPacket(packet);
+                        if (entityType == EntityTypes.TEXT_DISPLAY) {
+                            TextDisplayMeta textDisplayMeta = new TextDisplayMeta(entityId, meta);
+                            applyTranslateOnPacketSend(e, textDisplayMeta::getText, comp -> {
+                                textDisplayMeta.setText(comp);
+                                packet.setEntityMetadata(textDisplayMeta.createPacket().getEntityMetadata());
+                            });
+                        } else {
+                            EntityMeta entityMeta = new EntityMeta(entityId, meta);
+                            Component name = entityMeta.getCustomName();
+                            if (name != null)
+                                applyTranslateOnPacketSend(e, () -> name, comp -> {
+                                    entityMeta.setCustomName(comp);
+                                    packet.setEntityMetadata(entityMeta.createPacket().getEntityMetadata());
+                                });
                         }
                     }
                     case WINDOW_ITEMS -> {

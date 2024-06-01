@@ -21,15 +21,48 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
                     <source>16</source>
                     <target>16</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.github.Tofaa2</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.entitylib</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
+
     <dependencies>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>api</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>common</artifactId>
+            <version>2.2.1</version>
+        </dependency>
         <dependency>
             <groupId>com.github.retrooper.packetevents</groupId>
             <artifactId>api</artifactId>

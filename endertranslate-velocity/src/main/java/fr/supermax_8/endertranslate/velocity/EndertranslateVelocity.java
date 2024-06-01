@@ -12,6 +12,9 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import fr.supermax_8.endertranslate.core.ETLoader;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import io.github.retrooper.packetevents.velocity.factory.VelocityPacketEventsBuilder;
+import me.tofaa.entitylib.APIConfig;
+import me.tofaa.entitylib.EntityLib;
+import me.tofaa.entitylib.velocity.VelocityEntityLibPlatform;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -57,7 +60,18 @@ public class EndertranslateVelocity {
         );
 
         PacketEvents.getAPI().init();
-    }
 
+        int protocolVersion = PacketEvents.getAPI().getServerManager().getVersion().getProtocolVersion();
+        System.out.println("PROTO VERSION : " + protocolVersion);
+
+        VelocityEntityLibPlatform platform = new VelocityEntityLibPlatform(this, proxyServer);
+        APIConfig settings = new APIConfig(PacketEvents.getAPI())
+                .debugMode()
+                .tickTickables()
+                .trackPlatformEntities()
+                .usePlatformLogger();
+
+        EntityLib.init(platform, settings);
+    }
 
 }
