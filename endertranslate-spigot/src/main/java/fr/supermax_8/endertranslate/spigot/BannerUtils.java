@@ -1,7 +1,6 @@
 package fr.supermax_8.endertranslate.spigot;
 
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
