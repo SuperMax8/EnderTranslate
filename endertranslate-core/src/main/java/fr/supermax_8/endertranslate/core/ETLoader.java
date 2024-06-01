@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 public class ETLoader {
 
     private static final String[] libsLink = {
-            "https://github.com/SuperMax8/EnderTranslate/releases/download/0.1.0/endertranslate-libs-1.0.0.jar"
+            "https://github.com/SuperMax8/EnderTranslate/releases/download/1.2.0/endertranslate-libs-1.2.0.jar"
     };
 
     public static void loadExternalLibs(File dataFolder) throws IOException {
