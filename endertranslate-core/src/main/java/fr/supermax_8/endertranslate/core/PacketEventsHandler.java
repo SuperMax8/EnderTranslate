@@ -14,6 +14,7 @@ import com.github.retrooper.packetevents.protocol.item.ItemStack;
 import com.github.retrooper.packetevents.protocol.nbt.*;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
+import com.github.retrooper.packetevents.protocol.player.User;
 import com.github.retrooper.packetevents.protocol.score.FixedScoreFormat;
 import com.github.retrooper.packetevents.protocol.score.ScoreFormat;
 import com.github.retrooper.packetevents.util.adventure.AdventureSerializer;
@@ -27,6 +28,7 @@ import me.tofaa.entitylib.meta.EntityMeta;
 import me.tofaa.entitylib.meta.Metadata;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 
 import java.util.Collection;
 import java.util.Map;
@@ -40,8 +42,9 @@ public class PacketEventsHandler {
 
     @Getter
     private static PacketEventsHandler instance;
-    private ConcurrentHashMap<Integer, EntityType> entitiesType = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entitiesMetaData = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, EntityType> entitiesType = new ConcurrentHashMap<>();
+    @Getter
+    private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata>> entitiesMetaData = new ConcurrentHashMap<>();
 
     public PacketEventsHandler() {
         instance = this;
@@ -114,33 +117,43 @@ public class PacketEventsHandler {
                     }
                     case DESTROY_ENTITIES -> {
                         WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(e);
+                        ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entityDataSent = entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>());
                         for (int id : packet.getEntityIds()) {
                             entitiesType.remove(id);
-                            entitiesMetaData.remove(id);
+                            entityDataSent.remove(id);
                         }
                     }
                     case ENTITY_METADATA -> {
                         try {
+                            WrapperPlayServerEntityMetadata clone = new WrapperPlayServerEntityMetadata(e);
                             WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(e);
                             int entityId = packet.getEntityId();
                             EntityType entityType = entitiesType.get(entityId);
 
                             Metadata meta = new Metadata(entityId);
                             meta.setMetaFromPacket(packet);
+                            boolean translated = false;
                             if (entityType == EntityTypes.TEXT_DISPLAY) {
                                 TextDisplayMeta textDisplayMeta = new TextDisplayMeta(entityId, meta);
-                                applyTranslateOnPacketSend(e, textDisplayMeta::getText, comp -> {
+                                translated = applyTranslateOnPacketSend(e, textDisplayMeta::getText, comp -> {
                                     textDisplayMeta.setText(comp);
                                     packet.setEntityMetadata(textDisplayMeta.createPacket().getEntityMetadata());
                                 });
                             } else {
                                 EntityMeta entityMeta = new EntityMeta(entityId, meta);
-                                Component name = entityMeta.getCustomName();
-                                if (name != null)
-                                    applyTranslateOnPacketSend(e, () -> name, comp -> {
+                                TextComponent name = (TextComponent) entityMeta.getCustomName();
+                                if (name != null) {
+                                    System.out.println("NAAAAME" + name.toString());
+                                    translated = applyTranslateOnPacketSend(e, () -> name, comp -> {
                                         entityMeta.setCustomName(comp);
                                         packet.setEntityMetadata(entityMeta.createPacket().getEntityMetadata());
                                     });
+                                }
+                            }
+                            if (translated) {
+                                entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>()).put(entityId, clone);
+                                e.setLastUsedWrapper(packet);
+                                System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ");
                             }
                         } catch (Exception ex) {
                         }
@@ -202,6 +215,12 @@ public class PacketEventsHandler {
                 }
             }
         });
+    }
+
+    public void resendEntityMetaPackets(Object playerObj) {
+        User user = PacketEvents.getAPI().getPlayerManager().getUser(playerObj);
+        ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entityMetadataSent = entitiesMetaData.computeIfAbsent(user.getUUID(), k -> new ConcurrentHashMap<>());
+        entityMetadataSent.values().forEach(user::sendPacket);
     }
 
     public void applyTranslateOnScoreboardFormat(PacketSendEvent e, ScoreFormat format, Consumer<ScoreFormat> setFormat) {
@@ -279,19 +298,25 @@ public class PacketEventsHandler {
         }
     }
 
-    public void applyTranslateOnPacketSend(PacketSendEvent e, Supplier<Component> getMessage, Consumer<Component> setMessage) {
+    public boolean applyTranslateOnPacketSend(PacketSendEvent e, Supplier<Component> getMessage, Consumer<Component> setMessage) {
         Component toTranslate = getMessage.get();
-        if (toTranslate == null) return;
+        if (toTranslate == null) return false;
         String message = AdventureSerializer.toJson(toTranslate);
         String translated = applyTranslate(e.getUser().getUUID(), message);
         if (translated != null) {
             setMessage.accept(AdventureSerializer.parseComponent(translated));
             e.markForReEncode(true);
+            return true;
         }
+        return false;
     }
 
     public String applyTranslate(UUID playerId, String toTranslate) {
         String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(playerId);
+        return applyTranslate(playerLanguage, toTranslate);
+    }
+
+    public String applyTranslate(String playerLanguage, String toTranslate) {
         StringBuilder sb = new StringBuilder(toTranslate);
 
         EnderTranslateConfig config = EnderTranslateConfig.getInstance();
@@ -329,6 +354,12 @@ public class PacketEventsHandler {
         String[] params = null;
         if (startParamIndex != -1) {
             params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
+            /*System.out.println("PARAMS " + params);
+            for (int i = 0; i < params.length; i++) {
+                System.out.println("PAAAAARAM " + params[i]);
+                String translate = applyTranslate(playerLanguage, params[i]);
+                if (translate != null) params[i] = translate;
+            }*/
             langPlaceholder = langPlaceholder.substring(0, startParamIndex);
         }
 

@@ -1,6 +1,7 @@
 package fr.supermax_8.endertranslate.spigot;
 
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
+import fr.supermax_8.endertranslate.core.PacketEventsHandler;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.packets.PlayerLanguageRequest;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
@@ -8,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -33,6 +35,13 @@ public class PlayerListener implements Listener {
             ServerWebSocketClient.getInstance().sendPacket(new PlayerLanguageRequest(playerId, null, language ->
                     TranslatePlayerManager.getInstance().setPlayerLanguage(playerId, language)));
         });
+    }
+
+    @EventHandler
+    public void quit(PlayerQuitEvent e) {
+        PacketEventsHandler handler = PacketEventsHandler.getInstance();
+        if (handler == null) return;
+        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
     }
 
 }

@@ -37,6 +37,9 @@ public class EnderTranslate {
     private File pluginDir;
     @Getter
     private Function<Object, UUID> playerObjectToUUIDFunction;
+    @Getter
+    private Function<UUID, Object> uuidToPlayerObjFunction;
+
     private static Consumer<String> log;
 
     private EnderTranslateConfig config;
@@ -68,10 +71,11 @@ public class EnderTranslate {
     @Setter
     private String editorSecret = Base64Utils.generateSecuredToken(8);
 
-    public EnderTranslate(File pluginDir, Function<Object, UUID> playerObjectToUUIDFunction, Consumer<String> log) {
+    public EnderTranslate(File pluginDir, Function<Object, UUID> playerObjectToUUIDFunction, Function<UUID, Object> uuidToPlayerObjFunction, Consumer<String> log) {
         EnderTranslate.log = log;
         this.pluginDir = pluginDir;
         this.playerObjectToUUIDFunction = playerObjectToUUIDFunction;
+        this.uuidToPlayerObjFunction = uuidToPlayerObjFunction;
         log("§7Loading...");
         /*editorSecret = "dev";*/
         load();

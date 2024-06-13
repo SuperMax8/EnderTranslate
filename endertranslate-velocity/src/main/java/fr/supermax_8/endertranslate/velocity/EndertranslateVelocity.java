@@ -3,6 +3,8 @@ package fr.supermax_8.endertranslate.velocity;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginContainer;
@@ -11,6 +13,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.supermax_8.endertranslate.core.ETLoader;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
+import fr.supermax_8.endertranslate.core.PacketEventsHandler;
 import io.github.retrooper.packetevents.velocity.factory.VelocityPacketEventsBuilder;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
@@ -56,6 +59,7 @@ public class EndertranslateVelocity {
         enderTranslate = new EnderTranslate(
                 dataDirectory.toFile(),
                 obj -> ((Player) obj).getUniqueId(),
+                id -> proxyServer.getPlayer(id),
                 s -> logger.atInfo().log(s)
         );
 
@@ -71,6 +75,20 @@ public class EndertranslateVelocity {
                 .usePlatformLogger();
 
         EntityLib.init(platform, settings);
+    }
+
+    @Subscribe
+    public void onDisconnect(DisconnectEvent e) {
+        PacketEventsHandler handler = PacketEventsHandler.getInstance();
+        if (handler == null) return;
+        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
+    }
+
+    @Subscribe
+    public void onSwitchServ(ServerConnectedEvent e) {
+        PacketEventsHandler handler = PacketEventsHandler.getInstance();
+        if (handler == null) return;
+        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
     }
 
 }

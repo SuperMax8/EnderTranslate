@@ -43,6 +43,7 @@ public final class EndertranslateSpigot extends JavaPlugin {
         enderTranslate = new EnderTranslate(
                 getDataFolder(),
                 obj -> ((Player) obj).getUniqueId(),
+                Bukkit::getPlayer,
                 s -> Bukkit.getConsoleSender().sendMessage(s)
         );
 

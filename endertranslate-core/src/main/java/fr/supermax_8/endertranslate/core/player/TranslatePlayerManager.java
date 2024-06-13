@@ -2,6 +2,7 @@ package fr.supermax_8.endertranslate.core.player;
 
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
+import fr.supermax_8.endertranslate.core.PacketEventsHandler;
 import fr.supermax_8.endertranslate.core.language.LanguageManager;
 import lombok.Getter;
 
@@ -57,6 +58,10 @@ public class TranslatePlayerManager {
                 e.printStackTrace();
             }
         }
+
+        PacketEventsHandler handler = PacketEventsHandler.getInstance();
+        if (handler == null) return;
+        handler.resendEntityMetaPackets(EnderTranslate.getInstance().getUuidToPlayerObjFunction().apply(playerId));
     }
 
     public String getPlayerLanguage(UUID playerId) {
