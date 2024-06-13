@@ -143,7 +143,6 @@ public class PacketEventsHandler {
                                 EntityMeta entityMeta = new EntityMeta(entityId, meta);
                                 TextComponent name = (TextComponent) entityMeta.getCustomName();
                                 if (name != null) {
-                                    System.out.println("NAAAAME" + name.toString());
                                     translated = applyTranslateOnPacketSend(e, () -> name, comp -> {
                                         entityMeta.setCustomName(comp);
                                         packet.setEntityMetadata(entityMeta.createPacket().getEntityMetadata());
@@ -153,7 +152,6 @@ public class PacketEventsHandler {
                             if (translated) {
                                 entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>()).put(entityId, clone);
                                 e.setLastUsedWrapper(packet);
-                                System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ");
                             }
                         } catch (Exception ex) {
                         }
