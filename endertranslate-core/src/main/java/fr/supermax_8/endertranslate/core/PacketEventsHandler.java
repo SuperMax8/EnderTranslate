@@ -281,14 +281,19 @@ public class PacketEventsHandler {
             // Translate lore
             if (displayTags.containsKey("Lore")) {
                 NBTList<NBTString> lore = (NBTList<NBTString>) displayTags.get("Lore");
-                NBTList<NBTString> newLore = null;
+                NBTList<NBTString> newLore = new NBTList<>(NBTType.STRING);
+                boolean loreModified = false;
                 for (NBTString line : lore.getTags()) {
-                    String translated = applyTranslate(playerId, line.getValue());
-                    if (translated == null) continue;
-                    if (newLore == null) newLore = new NBTList<>(NBTType.STRING);
-                    newLore.addTag(new NBTString(translated));
+                    String lineValue = line.getValue();
+                    String translated = applyTranslate(playerId, lineValue);
+                    if (translated == null)
+                        newLore.addTag(line);
+                    else {
+                        newLore.addTag(new NBTString(translated));
+                        loreModified = true;
+                    }
                 }
-                if (newLore != null) {
+                if (loreModified) {
                     display.setTag("Lore", newLore);
                     modified = true;
                 }
