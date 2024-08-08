@@ -67,8 +67,4 @@ public final class EndertranslateSpigot extends JavaPlugin {
         EntityLib.init(platform, settings);
     }
 
-    @Override
-    public void onDisable() {
-    }
-
 }

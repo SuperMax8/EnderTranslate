@@ -62,157 +62,167 @@ public class PacketEventsHandler {
             }
 
             public void onPacketSend(PacketSendEvent e) {
-                PacketTypeCommon packetType = e.getPacketType();
-                if (!(packetType instanceof PacketType.Play.Server type)) return;
-                switch (type) {
-                    case SYSTEM_CHAT_MESSAGE -> {
-                        WrapperPlayServerSystemChatMessage packet = new WrapperPlayServerSystemChatMessage(e);
-                        applyTranslateOnPacketSend(e, packet::getMessage, packet::setMessage);
-                    }
-                    case CHAT_MESSAGE -> {
-                        WrapperPlayServerChatMessage packet = new WrapperPlayServerChatMessage(e);
-                        ChatMessage message = packet.getMessage();
-                        if (message instanceof ChatMessage_v1_19_3 cm) {
-                            Optional<Component> unsigned = cm.getUnsignedChatContent();
-                            if (unsigned.isEmpty())
-                                applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
-                            else applyTranslateOnPacketSend(e, unsigned::get, cm::setUnsignedChatContent);
-                        } else if (message instanceof ChatMessage_v1_19_1 cm) {
-                            Component unsigned = cm.getUnsignedChatContent();
-                            if (unsigned == null)
-                                applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
-                            applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
-                        } else if (message instanceof ChatMessage_v1_19 cm) {
-                            Component unsigned = cm.getUnsignedChatContent();
-                            if (unsigned == null)
-                                applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
-                            applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
-                        } else
-                            applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
-                    }
-                    case ACTION_BAR -> {
-                        WrapperPlayServerActionBar packet = new WrapperPlayServerActionBar(e);
-                        applyTranslateOnPacketSend(e, packet::getActionBarText, packet::setActionBarText);
-                    }
-                    case TITLE -> {
-                        WrapperPlayServerTitle packet = new WrapperPlayServerTitle(e);
-                        applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
-                        applyTranslateOnPacketSend(e, packet::getSubtitle, packet::setSubtitle);
-                    }
-                    case SET_TITLE_TEXT -> {
-                        WrapperPlayServerSetTitleText packet = new WrapperPlayServerSetTitleText(e);
-                        applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
-                    }
-                    case SET_TITLE_SUBTITLE -> {
-                        WrapperPlayServerSetTitleSubtitle packet = new WrapperPlayServerSetTitleSubtitle(e);
-                        applyTranslateOnPacketSend(e, packet::getSubtitle, packet::setSubtitle);
-                    }
-                    case OPEN_WINDOW -> {
-                        WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow(e);
-                        applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
-                    }
-                    case SPAWN_ENTITY -> {
-                        WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(e);
-                        entitiesType.put(packet.getEntityId(), packet.getEntityType());
-                    }
-                    case DESTROY_ENTITIES -> {
-                        WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(e);
-                        ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entityDataSent = entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>());
-                        for (int id : packet.getEntityIds()) {
-                            entitiesType.remove(id);
-                            entityDataSent.remove(id);
-                        }
-                    }
-                    case ENTITY_METADATA -> {
-                        try {
-                            WrapperPlayServerEntityMetadata clone = new WrapperPlayServerEntityMetadata(e);
-                            WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(e);
-                            int entityId = packet.getEntityId();
-                            EntityType entityType = entitiesType.get(entityId);
-
-                            Metadata meta = new Metadata(entityId);
-                            meta.setMetaFromPacket(packet);
-                            boolean translated = false;
-                            if (entityType == EntityTypes.TEXT_DISPLAY) {
-                                TextDisplayMeta textDisplayMeta = new TextDisplayMeta(entityId, meta);
-                                translated = applyTranslateOnPacketSend(e, textDisplayMeta::getText, comp -> {
-                                    textDisplayMeta.setText(comp);
-                                    packet.setEntityMetadata(textDisplayMeta.createPacket().getEntityMetadata());
-                                });
-                            } else {
-                                EntityMeta entityMeta = new EntityMeta(entityId, meta);
-                                TextComponent name = (TextComponent) entityMeta.getCustomName();
-                                if (name != null) {
-                                    translated = applyTranslateOnPacketSend(e, () -> name, comp -> {
-                                        entityMeta.setCustomName(comp);
-                                        packet.setEntityMetadata(entityMeta.createPacket().getEntityMetadata());
-                                    });
-                                }
-                            }
-                            if (translated) {
-                                entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>()).put(entityId, clone);
-                                e.setLastUsedWrapper(packet);
-                            }
-                        } catch (Exception ex) {
-                        }
-                    }
-                    case WINDOW_ITEMS -> {
-                        WrapperPlayServerWindowItems packet = new WrapperPlayServerWindowItems(e);
-                        applyTranslateOnItemStacks(e, packet.getItems());
-                    }
-                    case SET_SLOT -> {
-                        WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(e);
-                        applyTranslateOnItemStack(e, packet.getItem());
-                    }
-                    case DISCONNECT -> {
-                        WrapperPlayServerDisconnect packet = new WrapperPlayServerDisconnect(e);
-                        applyTranslateOnPacketSend(e, packet::getReason, packet::setReason);
-                    }
-                    case BOSS_BAR -> {
-                        WrapperPlayServerBossBar packet = new WrapperPlayServerBossBar(e);
-                        if (packet.getAction() instanceof WrapperPlayServerBossBar.UpdateTitleAction titleAction) {
-                            applyTranslateOnPacketSend(e, () -> titleAction.title, comp -> titleAction.title = comp);
-                        }
-                    }
-                    case PLAYER_LIST_HEADER_AND_FOOTER -> {
-                        WrapperPlayServerPlayerListHeaderAndFooter packet = new WrapperPlayServerPlayerListHeaderAndFooter(e);
-                        applyTranslateOnPacketSend(e, packet::getHeader, packet::setHeader);
-                        applyTranslateOnPacketSend(e, packet::getFooter, packet::setFooter);
-                    }
-                    case DISPLAY_SCOREBOARD -> {
-                        WrapperPlayServerDisplayScoreboard packet = new WrapperPlayServerDisplayScoreboard(e);
-                        applyTranslateOnPacketSendString(e, packet::getScoreName, packet::setScoreName);
-                    }
-                    case SCOREBOARD_OBJECTIVE -> {
-                        WrapperPlayServerScoreboardObjective packet = new WrapperPlayServerScoreboardObjective(e);
-                        applyTranslateOnPacketSendString(e, packet::getName, packet::setName);
-                        applyTranslateOnPacketSend(e, packet::getDisplayName, packet::setDisplayName);
-                        applyTranslateOnScoreboardFormat(e, packet.getScoreFormat(), packet::setScoreFormat);
-                    }
-                    case RESET_SCORE -> {
-                        WrapperPlayServerResetScore packet = new WrapperPlayServerResetScore(e);
-                        applyTranslateOnPacketSendString(e, packet::getObjective, packet::setObjective);
-                        applyTranslateOnPacketSendString(e, packet::getTargetName, packet::setTargetName);
-                    }
-                    case UPDATE_SCORE -> {
-                        WrapperPlayServerUpdateScore packet = new WrapperPlayServerUpdateScore(e);
-                        applyTranslateOnPacketSendString(e, packet::getObjectiveName, packet::setObjectiveName);
-                        applyTranslateOnPacketSendString(e, packet::getEntityName, packet::setEntityName);
-                        applyTranslateOnScoreboardFormat(e, packet.getScoreFormat(), packet::setScoreFormat);
-                        applyTranslateOnPacketSend(e, packet::getEntityDisplayName, packet::setEntityDisplayName);
-                    }
-                    case TEAMS -> {
-                        WrapperPlayServerTeams packet = new WrapperPlayServerTeams(e);
-                        applyTranslateOnPacketSendString(e, packet::getTeamName, packet::setTeamName);
-                        packet.getTeamInfo().ifPresent(scoreBoardTeamInfo -> {
-                            applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getDisplayName, scoreBoardTeamInfo::setDisplayName);
-                            applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getPrefix, scoreBoardTeamInfo::setPrefix);
-                            applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getSuffix, scoreBoardTeamInfo::setSuffix);
-                        });
-                    }
+                try {
+                    handlePacket(e);
+                } catch (Throwable ex) {
+                    System.out.println("§cERRRRORORORORORORORORO TRANSLATION: ");
+                    ex.printStackTrace();
                 }
             }
         });
+    }
+
+    private void handlePacket(PacketSendEvent e) {
+        PacketTypeCommon packetType = e.getPacketType();
+        if (!(packetType instanceof PacketType.Play.Server type)) return;
+        switch (type) {
+            case SYSTEM_CHAT_MESSAGE -> {
+                WrapperPlayServerSystemChatMessage packet = new WrapperPlayServerSystemChatMessage(e);
+                applyTranslateOnPacketSend(e, packet::getMessage, packet::setMessage);
+            }
+            case CHAT_MESSAGE -> {
+                WrapperPlayServerChatMessage packet = new WrapperPlayServerChatMessage(e);
+                ChatMessage message = packet.getMessage();
+                if (message instanceof ChatMessage_v1_19_3 cm) {
+                    Optional<Component> unsigned = cm.getUnsignedChatContent();
+                    if (unsigned.isEmpty())
+                        applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                    else applyTranslateOnPacketSend(e, unsigned::get, cm::setUnsignedChatContent);
+                } else if (message instanceof ChatMessage_v1_19_1 cm) {
+                    Component unsigned = cm.getUnsignedChatContent();
+                    if (unsigned == null)
+                        applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                    applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
+                } else if (message instanceof ChatMessage_v1_19 cm) {
+                    Component unsigned = cm.getUnsignedChatContent();
+                    if (unsigned == null)
+                        applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+                    applyTranslateOnPacketSend(e, cm::getUnsignedChatContent, cm::setUnsignedChatContent);
+                } else
+                    applyTranslateOnPacketSend(e, message::getChatContent, message::setChatContent);
+            }
+            case ACTION_BAR -> {
+                WrapperPlayServerActionBar packet = new WrapperPlayServerActionBar(e);
+                applyTranslateOnPacketSend(e, packet::getActionBarText, packet::setActionBarText);
+            }
+            case TITLE -> {
+                WrapperPlayServerTitle packet = new WrapperPlayServerTitle(e);
+                applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
+                applyTranslateOnPacketSend(e, packet::getSubtitle, packet::setSubtitle);
+            }
+            case SET_TITLE_TEXT -> {
+                WrapperPlayServerSetTitleText packet = new WrapperPlayServerSetTitleText(e);
+                applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
+            }
+            case SET_TITLE_SUBTITLE -> {
+                WrapperPlayServerSetTitleSubtitle packet = new WrapperPlayServerSetTitleSubtitle(e);
+                applyTranslateOnPacketSend(e, packet::getSubtitle, packet::setSubtitle);
+            }
+            case OPEN_WINDOW -> {
+                WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow(e);
+                applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
+            }
+            case SPAWN_ENTITY -> {
+                WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(e);
+                entitiesType.put(packet.getEntityId(), packet.getEntityType());
+            }
+            case DESTROY_ENTITIES -> {
+                WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(e);
+                ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entityDataSent = entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>());
+                for (int id : packet.getEntityIds()) {
+                    entitiesType.remove(id);
+                    entityDataSent.remove(id);
+                }
+            }
+            case ENTITY_METADATA -> {
+                try {
+                    WrapperPlayServerEntityMetadata clone = new WrapperPlayServerEntityMetadata(e);
+                    WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(e);
+                    int entityId = packet.getEntityId();
+                    EntityType entityType = entitiesType.get(entityId);
+
+                    Metadata meta = new Metadata(entityId);
+                    meta.setMetaFromPacket(packet);
+                    boolean translated = false;
+                    if (entityType == EntityTypes.TEXT_DISPLAY) {
+                        TextDisplayMeta textDisplayMeta = new TextDisplayMeta(entityId, meta);
+                        translated = applyTranslateOnPacketSend(e, textDisplayMeta::getText, comp -> {
+                            textDisplayMeta.setText(comp);
+                            packet.setEntityMetadata(textDisplayMeta.createPacket().getEntityMetadata());
+                        });
+                    } else {
+                        EntityMeta entityMeta = new EntityMeta(entityId, meta);
+                        TextComponent name = (TextComponent) entityMeta.getCustomName();
+                        if (name != null) {
+                            translated = applyTranslateOnPacketSend(e, () -> name, comp -> {
+                                entityMeta.setCustomName(comp);
+                                packet.setEntityMetadata(entityMeta.createPacket().getEntityMetadata());
+                            });
+                        }
+                    }
+                    if (translated) {
+                        entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>()).put(entityId, clone);
+                        e.setLastUsedWrapper(packet);
+                    }
+                } catch (Exception ex) {
+                }
+            }
+            case WINDOW_ITEMS -> {
+                WrapperPlayServerWindowItems packet = new WrapperPlayServerWindowItems(e);
+                applyTranslateOnItemStacks(e, packet.getItems());
+                packet.getCarriedItem().ifPresent(itm -> applyTranslateOnItemStack(e, itm));
+            }
+            case SET_SLOT -> {
+                WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(e);
+                applyTranslateOnItemStack(e, packet.getItem());
+            }
+            case DISCONNECT -> {
+                WrapperPlayServerDisconnect packet = new WrapperPlayServerDisconnect(e);
+                applyTranslateOnPacketSend(e, packet::getReason, packet::setReason);
+            }
+            case BOSS_BAR -> {
+                WrapperPlayServerBossBar packet = new WrapperPlayServerBossBar(e);
+                if (packet.getAction() instanceof WrapperPlayServerBossBar.UpdateTitleAction titleAction) {
+                    applyTranslateOnPacketSend(e, () -> titleAction.title, comp -> titleAction.title = comp);
+                }
+            }
+            case PLAYER_LIST_HEADER_AND_FOOTER -> {
+                WrapperPlayServerPlayerListHeaderAndFooter packet = new WrapperPlayServerPlayerListHeaderAndFooter(e);
+                applyTranslateOnPacketSend(e, packet::getHeader, packet::setHeader);
+                applyTranslateOnPacketSend(e, packet::getFooter, packet::setFooter);
+            }
+            case DISPLAY_SCOREBOARD -> {
+                WrapperPlayServerDisplayScoreboard packet = new WrapperPlayServerDisplayScoreboard(e);
+                applyTranslateOnPacketSendString(e, packet::getScoreName, packet::setScoreName);
+            }
+            case SCOREBOARD_OBJECTIVE -> {
+                WrapperPlayServerScoreboardObjective packet = new WrapperPlayServerScoreboardObjective(e);
+                applyTranslateOnPacketSendString(e, packet::getName, packet::setName);
+                applyTranslateOnPacketSend(e, packet::getDisplayName, packet::setDisplayName);
+                applyTranslateOnScoreboardFormat(e, packet.getScoreFormat(), packet::setScoreFormat);
+            }
+            case RESET_SCORE -> {
+                WrapperPlayServerResetScore packet = new WrapperPlayServerResetScore(e);
+                applyTranslateOnPacketSendString(e, packet::getObjective, packet::setObjective);
+                applyTranslateOnPacketSendString(e, packet::getTargetName, packet::setTargetName);
+            }
+            case UPDATE_SCORE -> {
+                WrapperPlayServerUpdateScore packet = new WrapperPlayServerUpdateScore(e);
+                applyTranslateOnPacketSendString(e, packet::getObjectiveName, packet::setObjectiveName);
+                applyTranslateOnPacketSendString(e, packet::getEntityName, packet::setEntityName);
+                applyTranslateOnScoreboardFormat(e, packet.getScoreFormat(), packet::setScoreFormat);
+                applyTranslateOnPacketSend(e, packet::getEntityDisplayName, packet::setEntityDisplayName);
+            }
+            case TEAMS -> {
+                WrapperPlayServerTeams packet = new WrapperPlayServerTeams(e);
+                applyTranslateOnPacketSendString(e, packet::getTeamName, packet::setTeamName);
+                packet.getTeamInfo().ifPresent(scoreBoardTeamInfo -> {
+                    applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getDisplayName, scoreBoardTeamInfo::setDisplayName);
+                    applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getPrefix, scoreBoardTeamInfo::setPrefix);
+                    applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getSuffix, scoreBoardTeamInfo::setSuffix);
+                });
+            }
+        }
     }
 
     public void resendEntityMetaPackets(Object playerObj) {
