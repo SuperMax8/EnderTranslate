@@ -109,10 +109,6 @@
                                     <pattern>io.github.retrooper.packetevents</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.velocity</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>com.github.Tofaa2</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.entitylib</shadedPattern>
-                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -196,12 +192,25 @@
         <dependency>
             <groupId>com.github.retrooper.packetevents</groupId>
             <artifactId>velocity</artifactId>
-            <version>2.4.1</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.Tofaa2.EntityLib</groupId>
             <artifactId>velocity</artifactId>
             <version>2.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>api</artifactId>
+            <version>2.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>common</artifactId>
+            <version>2.2.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

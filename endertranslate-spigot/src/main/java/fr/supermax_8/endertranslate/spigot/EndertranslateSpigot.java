@@ -3,62 +3,52 @@ package fr.supermax_8.endertranslate.spigot;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.tcoded.folialib.FoliaLib;
 import com.tcoded.folialib.impl.ServerImplementation;
-import fr.supermax_8.endertranslate.core.ETLoader;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
-import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import lombok.Getter;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public final class EndertranslateSpigot extends JavaPlugin {
+public final class EndertranslateSpigot {
 
     @Getter
     private static EndertranslateSpigot instance;
 
     private EnderTranslate enderTranslate;
     @Getter
-    private final FoliaLib folia = new FoliaLib(this);
+    private final FoliaLib folia;
     @Getter
-    private final ServerImplementation scheduler = folia.getImpl();
+    private final ServerImplementation scheduler;
 
-    @Override
-    public void onLoad() {
-        long elapsedTime = ETLoader.loadLibs(getDataFolder());
+    private final EnderTranslateSpigotPlugin plugin;
 
-        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
-        PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
-                .checkForUpdates(false)
-                .bStats(false);
-        PacketEvents.getAPI().load();
+    public EndertranslateSpigot(EnderTranslateSpigotPlugin plugin) {
+        this.plugin = plugin;
+        folia = new FoliaLib(plugin);
+        scheduler = folia.getImpl();
     }
 
-
-    @Override
     public void onEnable() {
         instance = this;
         enderTranslate = new EnderTranslate(
-                getDataFolder(),
+                plugin.getDataFolder(),
                 obj -> ((Player) obj).getUniqueId(),
                 Bukkit::getPlayer,
                 s -> Bukkit.getConsoleSender().sendMessage(s)
         );
 
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderManager().register();
             EnderTranslate.log("PlaceholderAPI hook init !");
         }
 
-        getCommand("language").setExecutor(new LangCommand());
-        getCommand("endertranslate").setExecutor(new EnderTranslateCommand());
-        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        plugin.getCommand("language").setExecutor(new LangCommand());
+        plugin.getCommand("endertranslate").setExecutor(new EnderTranslateCommand());
+        plugin.getServer().getPluginManager().registerEvents(new PlayerListener(), plugin);
 
-        PacketEvents.getAPI().init();
-
-        SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
+        SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(plugin);
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
                 .tickTickables()
                 .trackPlatformEntities()

@@ -15,9 +15,6 @@ import fr.supermax_8.endertranslate.core.ETLoader;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
 import fr.supermax_8.endertranslate.core.PacketEventsHandler;
 import io.github.retrooper.packetevents.velocity.factory.VelocityPacketEventsBuilder;
-import me.tofaa.entitylib.APIConfig;
-import me.tofaa.entitylib.EntityLib;
-import me.tofaa.entitylib.velocity.VelocityEntityLibPlatform;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -36,6 +33,7 @@ public class EndertranslateVelocity {
     private ProxyServer proxyServer;
     private PluginContainer pluginContainer;
     private Path dataDirectory;
+    private EnderTranslateVelocityLibLoaded libLoaded;
 
     @Inject
     public EndertranslateVelocity(Logger logger, ProxyServer proxyServer, PluginContainer pluginContainer, @DataDirectory Path dataDirectory) {
@@ -52,6 +50,8 @@ public class EndertranslateVelocity {
                 .checkForUpdates(false)
                 .bStats(false);
         PacketEvents.getAPI().load();
+
+        libLoaded = new EnderTranslateVelocityLibLoaded(this);
     }
 
     @Subscribe
@@ -68,13 +68,8 @@ public class EndertranslateVelocity {
         int protocolVersion = PacketEvents.getAPI().getServerManager().getVersion().getProtocolVersion();
         System.out.println("PROTO VERSION : " + protocolVersion);
 
-        VelocityEntityLibPlatform platform = new VelocityEntityLibPlatform(this, proxyServer);
-        APIConfig settings = new APIConfig(PacketEvents.getAPI())
-                .tickTickables()
-                .trackPlatformEntities()
-                .usePlatformLogger();
 
-        EntityLib.init(platform, settings);
+        libLoaded.onProxyInitialization(event, proxyServer);
     }
 
     @Subscribe

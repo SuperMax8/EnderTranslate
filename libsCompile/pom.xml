@@ -48,50 +48,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.tcoded</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.folialib</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.github.retrooper.packetevents</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.api</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>io.github.retrooper.packetevents</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.impl</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>net.kyori</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.kyori</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>dev.triumphteam</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.triumphteam</shadedPattern>
-                                </relocation>
-                            </relocations>
-                            <!--<relocations>
-                                <relocation>
-                                    <pattern>com.github.retrooper.packetevents</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.api</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>io.github.retrooper.packetevents</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents.impl</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>net.kyori</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.kyori</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>dev.dejvokep.boostedyaml</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.boostedyaml</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.tcoded</pattern>
-                                    <shadedPattern>fr.supermax_8.endertranslate.libs.folialib</shadedPattern>
-                                </relocation>
-                            </relocations>-->
                         </configuration>
                     </execution>
                 </executions>
@@ -135,6 +91,27 @@
             <groupId>dev.triumphteam</groupId>
             <artifactId>triumph-gui</artifactId>
             <version>3.1.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>api</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>common</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>spigot</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <artifactId>velocity</artifactId>
+            <version>2.2.1</version>
         </dependency>
     </dependencies>
 
