@@ -29,7 +29,7 @@ public class WsPacketWrapper {
         public WsPacketWrapper deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject jsonObject = null;
             String type = null;
-            for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().asMap().entrySet()) {
+            for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
                 type = entry.getKey();
                 jsonObject = entry.getValue().getAsJsonObject();
                 break;
