@@ -1,6 +1,5 @@
 package fr.supermax_8.endertranslate.spigot;
 
-import fr.supermax_8.endertranslate.core.PacketEventsHandler;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
@@ -28,7 +27,11 @@ public class PlaceholderManager extends PlaceholderExpansion {
         switch (paramss[0]) {
             case "lang" -> {
                 String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(player.getUniqueId());
-                return PacketEventsHandler.getInstance().translatePlaceholder(paramss[1], playerLanguage);
+                return "";//AdventureSerializer.toLegacyFormat(PacketEventsHandler.getInstance().translatePlaceholder(paramss[1], playerLanguage));
+            }
+            case "langjson" -> {
+                String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(player.getUniqueId());
+                return "";//AdventureSerializer.toJson(PacketEventsHandler.getInstance().translatePlaceholder(paramss[1], playerLanguage));
             }
         }
         return null;

@@ -120,4 +120,8 @@ public class EnderTranslateConfig {
         }
     }
 
+    enum LEGACY_SERIALIZER {
+
+    }
+
 }

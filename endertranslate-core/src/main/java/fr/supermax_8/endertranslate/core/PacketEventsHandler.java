@@ -20,20 +20,24 @@ import com.github.retrooper.packetevents.protocol.score.ScoreFormat;
 import com.github.retrooper.packetevents.util.adventure.AdventureSerializer;
 import com.github.retrooper.packetevents.wrapper.configuration.client.WrapperConfigClientSettings;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
+import de.themoep.minedown.adventure.MineDown;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.translation.Translation;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
+import fr.supermax_8.endertranslate.core.utils.ComponentUtils;
 import lombok.Getter;
 import me.tofaa.entitylib.meta.EntityMeta;
 import me.tofaa.entitylib.meta.Metadata;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.w3c.dom.Text;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -324,33 +328,73 @@ public class PacketEventsHandler {
         return false;
     }
 
-    public String applyTranslate(UUID playerId, String toTranslate) {
+    public String applyTranslate(UUID playerId, String message) {
+        return AdventureSerializer.toJson(applyTranslate(playerId, AdventureSerializer.parseComponent(message)));
+    }
+
+    public Component applyTranslate(UUID playerId, Component toTranslate) {
         String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(playerId);
         return applyTranslate(playerLanguage, toTranslate);
     }
 
-    public String applyTranslate(String playerLanguage, String toTranslate) {
-        StringBuilder sb = new StringBuilder(toTranslate);
+    // bite [lang]a[/lang] ee
 
-        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
-        String startTag = config.getStartTag();
-        String endTag = config.getEndTag();
+    // bite [lang]a[/lang] ee
 
-        int startTagIndex = sb.indexOf(startTag);
-        while (startTagIndex != -1) {
-            int endTagIndex = sb.indexOf(endTag, startTagIndex);
-            if (endTagIndex == -1) break;
-            int startLangPlaceholderIndex = startTagIndex + startTag.length();
 
-            String langPlaceholder = sb.substring(startLangPlaceholderIndex, endTagIndex);
-            String endValue = translatePlaceholder(langPlaceholder, playerLanguage);
+    public Component applyTranslate(String playerLanguage, Component toTranslate) {
+        boolean modified = false;
+        // I make the component children thing simple, by making a simple list with all the component in order
+        LinkedList<Component> components = ComponentUtils.componentSeparatedList(toTranslate);
+        ListIterator<Component> itr = components.listIterator();
 
-            sb.replace(startTagIndex, endTagIndex + endTag.length(), endValue);
-            startTagIndex = sb.indexOf(startTag);
+        // I iterate on the list and I will add more component / replace if I need
+        while (itr.hasNext()) {
+            Component component = itr.next();
+            // It seems I can get some TranslatableComponent here so I need to check
+            if (!(component instanceof TextComponent textComponent)) {
+                /*System.out.println("NOT A TEXT COMP ????" + AdventureSerializer.toJson(component));*/
+                continue;
+            }
+            StringBuilder sb = new StringBuilder(textComponent.content());
+
+            EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+            String startTag = config.getStartTag();
+            String endTag = config.getEndTag();
+
+            int startTagIndex = sb.indexOf(startTag);
+            int endTagIndex;
+            int leftIndex = 0;
+            if (startTagIndex != -1) {
+                // Split the component in multiple parts to insert the translation component result
+                LinkedList<Component> splits = new LinkedList<>();
+                while (startTagIndex != -1) {
+                    endTagIndex = sb.indexOf(endTag, startTagIndex);
+                    if (endTagIndex == -1) break;
+                    int startLangPlaceholderIndex = startTagIndex + startTag.length();
+                    String langPlaceholder = sb.substring(startLangPlaceholderIndex, endTagIndex);
+                    Component endValue = translatePlaceholder(langPlaceholder, playerLanguage);
+
+                    // Add left side text
+                    splits.add(textComponent.content(sb.substring(leftIndex, startTagIndex)));
+                    // Add translation comp
+                    splits.add(endValue);
+
+                    leftIndex = endTagIndex + endTag.length();
+                    startTagIndex = sb.indexOf(startTag, endTagIndex);
+                    modified = true;
+                }
+                // Add the right part of the translation
+                if (leftIndex <= sb.length())
+                    splits.add(textComponent.content(sb.substring(leftIndex, sb.length())));
+                itr.remove();
+                for (Component c : splits)
+                    itr.add(c);
+            }
         }
 
-        String translatedMessage = sb.toString();
-        return translatedMessage.equals(toTranslate) ? null : translatedMessage;
+        // I merge back the list to 1 component containing all the others text components
+        return modified ? ComponentUtils.mergeComponents(components) : null;
     }
 
     /**
@@ -359,7 +403,7 @@ public class PacketEventsHandler {
      * @param playerLanguage
      * @return
      */
-    public String translatePlaceholder(String langPlaceholder, String playerLanguage) {
+    public Component translatePlaceholder(String langPlaceholder, String playerLanguage) {
         TranslationManager translationManager = TranslationManager.getInstance();
 
         // Load params
@@ -376,32 +420,28 @@ public class PacketEventsHandler {
             langPlaceholder = langPlaceholder.substring(0, startParamIndex);
         }
 
-        String endValue;
-
-        getEndValue:
-        {
-            Translation translation = translationManager.getTranslation(langPlaceholder);
-            String translationValue;
-            if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null) {
-                endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
-                break getEndValue;
+        Translation translation = translationManager.getTranslation(langPlaceholder);
+        String translationValue;
+        if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null)
+            return Component.text("TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND").color(NamedTextColor.RED);
+        if (params != null) {
+            StringBuilder translationValueBuilder = new StringBuilder(translationValue);
+            int i = 0;
+            for (String param : params) {
+                int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
+                if (paramIndex == -1) break;
+                Translation paramTranslation = translationManager.getTranslation(param);
+                translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
+                i++;
             }
-            if (params == null) endValue = translationValue;
-            else {
-                StringBuilder translationValueBuilder = new StringBuilder(translationValue);
-                int i = 0;
-                for (String param : params) {
-                    int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
-                    if (paramIndex == -1) break;
-                    Translation paramTranslation = translationManager.getTranslation(param);
-                    translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
-                    i++;
-                }
-                endValue = translationValueBuilder.toString();
-            }
+            translationValue = translationValueBuilder.toString();
         }
 
-        return endValue;
+        if (translationValue.contains("&"))
+            return MineDown.parse(translationValue);
+        if (translationValue.contains("§"))
+            return MineDown.parse(translationValue.replaceAll("§", "&"));
+        return MiniMessage.miniMessage().deserialize(translationValue);
     }
 
 }
