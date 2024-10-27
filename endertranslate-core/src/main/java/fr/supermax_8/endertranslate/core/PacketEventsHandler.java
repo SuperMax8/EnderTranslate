@@ -31,11 +31,8 @@ import me.tofaa.entitylib.meta.Metadata;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.w3c.dom.Text;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
