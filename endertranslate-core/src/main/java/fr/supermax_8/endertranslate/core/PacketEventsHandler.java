@@ -8,6 +8,7 @@ import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage;
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19;
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19_1;
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage_v1_19_3;
+import com.github.retrooper.packetevents.protocol.component.ComponentTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.protocol.item.ItemStack;
@@ -19,6 +20,7 @@ import com.github.retrooper.packetevents.protocol.score.FixedScoreFormat;
 import com.github.retrooper.packetevents.protocol.score.ScoreFormat;
 import com.github.retrooper.packetevents.util.adventure.AdventureSerializer;
 import com.github.retrooper.packetevents.wrapper.configuration.client.WrapperConfigClientSettings;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUpdateSign;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import de.themoep.minedown.adventure.MineDown;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
@@ -36,6 +38,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -43,6 +46,7 @@ public class PacketEventsHandler {
 
     @Getter
     private static PacketEventsHandler instance;
+
     private final ConcurrentHashMap<Integer, EntityType> entitiesType = new ConcurrentHashMap<>();
     @Getter
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata>> entitiesMetaData = new ConcurrentHashMap<>();
@@ -183,8 +187,8 @@ public class PacketEventsHandler {
             }
             case BOSS_BAR -> {
                 WrapperPlayServerBossBar packet = new WrapperPlayServerBossBar(e);
-                if (packet.getAction() instanceof WrapperPlayServerBossBar.UpdateTitleAction titleAction) {
-                    applyTranslateOnPacketSend(e, () -> titleAction.title, comp -> titleAction.title = comp);
+                if (packet.getAction() == WrapperPlayServerBossBar.Action.UPDATE_TITLE) {
+                    applyTranslateOnPacketSend(e, packet::getTitle, packet::setTitle);
                 }
             }
             case PLAYER_LIST_HEADER_AND_FOOTER -> {
@@ -243,7 +247,7 @@ public class PacketEventsHandler {
             applyTranslateOnItemStack(e, stack);
     }
 
-    public void applyTranslateOnItemStack(PacketSendEvent e, ItemStack stack) {
+    public void applyTranslateOnNBT(PacketSendEvent e, ItemStack stack) {
         boolean modified = false;
         NBTCompound nbt = stack.getNBT();
         if (nbt == null) return;
@@ -264,7 +268,6 @@ public class PacketEventsHandler {
             if (newPages != null) nbt.setTag("pages", newPages);
             modified = true;
         }
-
 
         NBTCompound display = (NBTCompound) tags.get("display");
         if (display != null) {
@@ -302,6 +305,44 @@ public class PacketEventsHandler {
         }
 
         if (modified) e.markForReEncode(true);
+    }
+
+
+    public void applyTranslateOnPatchableComponents(PacketSendEvent e, ItemStack stack) {
+        UUID playerId = e.getUser().getUUID();
+        AtomicBoolean modified = new AtomicBoolean(false);
+        stack.getComponent(ComponentTypes.LORE).ifPresent(lore -> {
+            ListIterator<Component> linesItr = lore.getLines().listIterator();
+            while (linesItr.hasNext()) {
+                Component line = linesItr.next();
+                Component translate = applyTranslate(playerId, line);
+                if (translate != null) {
+                    linesItr.set(translate);
+                    modified.set(true);
+                }
+            }
+        });
+
+        stack.getComponent(ComponentTypes.ITEM_NAME).ifPresent(name -> {
+            Component translate = applyTranslate(playerId, name);
+            if (translate != null) {
+                stack.setComponent(ComponentTypes.ITEM_NAME, translate);
+                modified.set(true);
+            }
+        });
+        stack.getComponent(ComponentTypes.CUSTOM_NAME).ifPresent(name -> {
+            Component translate = applyTranslate(playerId, name);
+            if (translate != null) {
+                stack.setComponent(ComponentTypes.CUSTOM_NAME, translate);
+                modified.set(true);
+            }
+        });
+        if (modified.get()) e.markForReEncode(true);
+    }
+
+    public void applyTranslateOnItemStack(PacketSendEvent e, ItemStack stack) {
+        if (stack.getNBT() != null) applyTranslateOnNBT(e, stack);
+        else applyTranslateOnPatchableComponents(e, stack);
     }
 
     public void applyTranslateOnPacketSendString(PacketSendEvent e, Supplier<String> getMessage, Consumer<String> setMessage) {

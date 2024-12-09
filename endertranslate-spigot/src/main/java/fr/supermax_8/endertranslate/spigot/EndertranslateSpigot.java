@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.tcoded.folialib.FoliaLib;
 import com.tcoded.folialib.impl.ServerImplementation;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import lombok.Getter;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
@@ -30,6 +31,14 @@ public final class EndertranslateSpigot {
         scheduler = folia.getImpl();
     }
 
+    public void onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(plugin));
+        PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
+                .checkForUpdates(false)
+                .bStats(false);
+        PacketEvents.getAPI().load();
+    }
+
     public void onEnable() {
         instance = this;
         enderTranslate = new EnderTranslate(
@@ -48,6 +57,8 @@ public final class EndertranslateSpigot {
         plugin.getCommand("endertranslate").setExecutor(new EnderTranslateCommand());
         plugin.getServer().getPluginManager().registerEvents(new PlayerListener(), plugin);
 
+        PacketEvents.getAPI().init();
+
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(plugin);
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
                 .tickTickables()
@@ -55,6 +66,11 @@ public final class EndertranslateSpigot {
                 .usePlatformLogger();
 
         EntityLib.init(platform, settings);
+    }
+
+
+    public void onDisable() {
+        PacketEvents.getAPI().terminate();
     }
 
 }

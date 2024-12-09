@@ -6,7 +6,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.2.7</version>
+        <version>1.3.1</version>
     </parent>
 
     <artifactId>libsCompile</artifactId>
@@ -48,6 +48,71 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.tcoded</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.folialib</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>dev</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.dev</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>jakarta</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.jakarta</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>javax</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.javax</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>kotlin</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.kotlin</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.eclipse</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.eclipse</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.javatuples</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.javatuples</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.jetbrains</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.jetbrains</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.intellij</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.intellij</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>io.javalin</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.javalin</shadedPattern>
+                                </relocation>
+<!--
+                                <relocation>
+                                    <pattern>net.kyori</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.kyori</shadedPattern>
+                                </relocation>-->
+
+                                <relocation>
+                                    <pattern>com.github.retrooper.packetevents</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>io.github.retrooper.packetevents</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>me.tofaa.entitylib</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.entitylib</shadedPattern>
+                                </relocation>
+
+                                <relocation>
+                                    <pattern>de.themoep.minedown</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.minedown</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -63,6 +128,10 @@
         <repository>
             <id>devmart-other</id>
             <url>https://nexuslite.gcnt.net/repos/other/</url>
+        </repository>
+        <repository>
+            <id>minebench-repo</id>
+            <url>https://repo.minebench.de/</url>
         </repository>
     </repositories>
 
@@ -94,24 +163,72 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-api</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-bungeecord</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-spigot</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-velocity</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>me.tofaa.entitylib</groupId>
             <artifactId>api</artifactId>
-            <version>2.4.10-SNAPSHOT</version>
+            <version>2.4.11-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <groupId>me.tofaa.entitylib</groupId>
             <artifactId>common</artifactId>
-            <version>2.4.10-SNAPSHOT</version>
+            <version>2.4.11-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <groupId>me.tofaa.entitylib</groupId>
             <artifactId>spigot</artifactId>
-            <version>2.4.10-SNAPSHOT</version>
+            <version>2.4.11-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.Tofaa2.EntityLib</groupId>
+            <groupId>me.tofaa.entitylib</groupId>
             <artifactId>velocity</artifactId>
-            <version>2.4.10-SNAPSHOT</version>
+            <version>2.4.11-SNAPSHOT</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>de.themoep</groupId>
+            <artifactId>minedown-adventure</artifactId>
+            <version>1.7.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
+            <version>4.3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bungeecord</artifactId>
+            <version>4.3.2</version>
         </dependency>
     </dependencies>
 

@@ -34,6 +34,7 @@ editorURL: http://endertranslate.superlion.fr/
 # Banners: https://www.gamergeeks.net/apps/minecraft/banners/country-flags
 # Banner name to key to enter: https://pastebin.com/EC6pvaV6
 # On this site you have a lot of country banners, when you see in the give command for example {Pattern:ls,Color:14}, add a line with "ls;14"
+# You can also put as second parameter the color in letter like "ls;BLACK"
 languages:
   english:
     title: §7English

@@ -17,7 +17,13 @@ public class BannerUtils {
         BannerMeta meta = (BannerMeta) banner.getItemMeta();
         for (String pattern : patterns) {
             String[] split = pattern.split(";");
-            meta.addPattern(new Pattern(DyeColor.values()[Integer.parseInt(split[1])], PatternType.getByIdentifier(split[0])));
+            DyeColor color;
+            try {
+                color = DyeColor.values()[Integer.parseInt(split[1])];
+            } catch (Exception e) {
+                color = DyeColor.valueOf(split[1].toUpperCase());
+            }
+            meta.addPattern(new Pattern(color, PatternType.getByIdentifier(split[0])));
         }
         meta.setDisplayName(title);
         meta.addItemFlags(ItemFlag.values());

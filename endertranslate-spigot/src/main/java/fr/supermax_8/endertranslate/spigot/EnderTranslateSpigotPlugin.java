@@ -1,8 +1,6 @@
 package fr.supermax_8.endertranslate.spigot;
 
-import com.github.retrooper.packetevents.PacketEvents;
 import fr.supermax_8.endertranslate.core.ETLoader;
-import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -19,20 +17,27 @@ public class EnderTranslateSpigotPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         long elapsedTime = ETLoader.loadLibs(getDataFolder());
+        System.out.println("Libs loaded in " + elapsedTime + " ms");
 
-        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
-        PacketEvents.getAPI().getSettings().reEncodeByDefault(false)
-                .checkForUpdates(false)
-                .bStats(false);
-        PacketEvents.getAPI().load();
+        initSpigot();
+        spigot.onLoad();
     }
 
 
     @Override
     public void onEnable() {
         instance = this;
-        spigot = new EndertranslateSpigot(this);
+        initSpigot();
         spigot.onEnable();
+    }
+
+    @Override
+    public void onDisable() {
+        spigot.onDisable();
+    }
+
+    private synchronized void initSpigot() {
+        if (spigot == null) spigot = new EndertranslateSpigot(this);
     }
 
 }
