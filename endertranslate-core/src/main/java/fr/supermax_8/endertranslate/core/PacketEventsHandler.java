@@ -46,12 +46,6 @@ public class PacketEventsHandler {
     @Getter
     private static PacketEventsHandler instance;
 
-    private final EnderTranslateConfig config = EnderTranslateConfig.getInstance();
-    private final String startTag = config.getStartTag();
-    private final String endTag = config.getEndTag();
-
-    private final TranslatePlayerManager translatePlayerManager = TranslatePlayerManager.getInstance();
-    private final TranslationManager translationManager = TranslationManager.getInstance();
     private final ConcurrentHashMap<Integer, EntityType> entitiesType = new ConcurrentHashMap<>();
     @Getter
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata>> entitiesMetaData = new ConcurrentHashMap<>();
@@ -372,7 +366,7 @@ public class PacketEventsHandler {
     }
 
     private String getLanguage(UUID playerId) {
-        return translatePlayerManager.getPlayerLanguage(playerId);
+        return TranslatePlayerManager.getInstance().getPlayerLanguage(playerId);
     }
 
     public String applyTranslatePlain(UUID playerId, String plaintext) {
@@ -410,6 +404,7 @@ public class PacketEventsHandler {
      * @return the translated text
      */
     public String translatePlaceholderPlain(String langPlaceholder, String playerLanguage) {
+        TranslationManager translationManager = TranslationManager.getInstance();
         // Load params
         int startParamIndex = langPlaceholder.indexOf("{");
         String[] params = null;
@@ -465,6 +460,10 @@ public class PacketEventsHandler {
     }
 
     public Component applyTranslateComponent(String playerLanguage, Component toTranslate) {
+        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+        String startTag = config.getStartTag();
+        String endTag = config.getEndTag();
+
         boolean modified = false;
         // I make the component children thing simple, by making a simple list with all the component in order
         LinkedList<Component> components = ComponentUtils.componentSeparatedList(toTranslate);
@@ -522,6 +521,7 @@ public class PacketEventsHandler {
      * @return
      */
     public Component translatePlaceholderComponent(String langPlaceholder, String playerLanguage) {
+        TranslationManager translationManager = TranslationManager.getInstance();
         // Load params
         int startParamIndex = langPlaceholder.indexOf("{");
         String[] params = null;
