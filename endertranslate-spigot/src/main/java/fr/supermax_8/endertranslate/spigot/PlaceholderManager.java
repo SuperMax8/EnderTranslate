@@ -29,11 +29,11 @@ public class PlaceholderManager extends PlaceholderExpansion {
         switch (paramss[0]) {
             case "lang" -> {
                 String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(player.getUniqueId());
-                return AdventureSerializer.toLegacyFormat(PacketEventsHandler.getInstance().translatePlaceholder(paramss[1], playerLanguage));
+                return AdventureSerializer.toLegacyFormat(PacketEventsHandler.getInstance().translatePlaceholderComponent(paramss[1], playerLanguage));
             }
             case "langjson" -> {
                 String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(player.getUniqueId());
-                return AdventureSerializer.toJson(PacketEventsHandler.getInstance().translatePlaceholder(paramss[1], playerLanguage));
+                return AdventureSerializer.toJson(PacketEventsHandler.getInstance().translatePlaceholderComponent(paramss[1], playerLanguage));
             }
         }
         return null;

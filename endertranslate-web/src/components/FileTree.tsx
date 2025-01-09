@@ -21,17 +21,21 @@ interface TreeNode {
     children: { [name: string]: TreeNode };
 }
 
-function buildTree(paths: string[]): TreeNode {
+function buildTree(paths: string[], openFolders: string[]): TreeNode {
     const root: TreeNode = {name: "root", isOpen: true, isDirectory: true, children: {}};
 
     paths.forEach(path => {
         const parts = path.split('/');
         let current = root;
+        let currentPath = "";
+
         parts.forEach(part => {
+            currentPath = currentPath ? `${currentPath}/${part}` : part;
+
             if (!current.children[part]) {
                 current.children[part] = {
                     name: part,
-                    isOpen: false,
+                    isOpen: openFolders.includes(currentPath),
                     isDirectory: !part.endsWith(".json"),
                     children: {}
                 };
@@ -64,12 +68,24 @@ const FileTree: React.FC<FileTreeProps> = ({
                                                moveFileProvider
                                            }) => {
     const [paths, setPaths] = useState(initialPaths);
-    /*    const [open] = useState<string[]>([])*/
-    const [tree, setTree] = useState(() => buildTree(initialPaths));
+    const [openFolders, setOpenFolders] = useState<string[]>(() => {
+        // Charger les données depuis localStorage au montage
+        return JSON.parse(localStorage.getItem("openFolders") || "[]");
+    });
+    const [tree, setTree] = useState(() => buildTree(initialPaths, openFolders));
 
     useEffect(() => {
-        setTree(buildTree(paths));
-    }, [paths]);
+        setTree(buildTree(paths, openFolders));
+    }, [paths, openFolders]);
+
+    useEffect(() => {
+        const savedOpenFolders = JSON.parse(localStorage.getItem("openFolders") || "[]");
+        setOpenFolders(savedOpenFolders);
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("openFolders", JSON.stringify(openFolders));
+    }, [openFolders]);
 
     /*    const reOpenFolders = () => {
             setTimeout(() => {
@@ -116,8 +132,19 @@ const FileTree: React.FC<FileTreeProps> = ({
         renameProvider(path, newPath);
     }
 
-    const toggleFolder = (nodePath: string[], save: boolean) => {
-        console.log("ToggleFolder: " + nodePath)
+    const toggleFolder = (nodePath: string[]) => {
+        console.log("ToggleFolder: " + nodePath);
+        const path = nodePath.join("/");
+
+        setOpenFolders(prev => {
+            const updatedFolders = prev.includes(path)
+                ? prev.filter(p => p !== path) // Fermer le dossier
+                : [...prev, path]; // Ouvrir le dossier
+
+            // Sauvegarde dans localStorage
+            localStorage.setItem("openFolders", JSON.stringify(updatedFolders));
+            return updatedFolders;
+        });
         // Création d'une copie profonde pour pouvoir modifier l'état
         const newTree = JSON.parse(JSON.stringify(tree)); // Une simple approche de copie profonde
         let current = newTree;
@@ -236,7 +263,7 @@ const FileTree: React.FC<FileTreeProps> = ({
                             <div
                                 onClick={() => {
                                     if (hasChildren) {
-                                        toggleFolder([...parentPath, fileName], true);
+                                        toggleFolder([...parentPath, fileName]);
                                         onFolderClick([...parentPath, fileName]);
                                     } else {
                                         onFileClick([...parentPath, fileName]);  // Déclencher le callback pour les fichiers ici

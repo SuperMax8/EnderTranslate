@@ -20,7 +20,6 @@ import com.github.retrooper.packetevents.protocol.score.FixedScoreFormat;
 import com.github.retrooper.packetevents.protocol.score.ScoreFormat;
 import com.github.retrooper.packetevents.util.adventure.AdventureSerializer;
 import com.github.retrooper.packetevents.wrapper.configuration.client.WrapperConfigClientSettings;
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUpdateSign;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import de.themoep.minedown.adventure.MineDown;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
@@ -47,6 +46,12 @@ public class PacketEventsHandler {
     @Getter
     private static PacketEventsHandler instance;
 
+    private final EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+    private final String startTag = config.getStartTag();
+    private final String endTag = config.getEndTag();
+
+    private final TranslatePlayerManager translatePlayerManager = TranslatePlayerManager.getInstance();
+    private final TranslationManager translationManager = TranslationManager.getInstance();
     private final ConcurrentHashMap<Integer, EntityType> entitiesType = new ConcurrentHashMap<>();
     @Getter
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata>> entitiesMetaData = new ConcurrentHashMap<>();
@@ -260,7 +265,7 @@ public class PacketEventsHandler {
             NBTList<NBTString> newPages = null;
             NBTList<NBTString> pages = (NBTList<NBTString>) tags.get("pages");
             for (NBTString page : pages.getTags()) {
-                String translated = applyTranslate(playerId, page.getValue());
+                String translated = applyTranslateJson(playerId, page.getValue());
                 if (translated == null) continue;
                 if (newPages == null) newPages = new NBTList<>(NBTType.STRING);
                 newPages.addTag(new NBTString(translated));
@@ -275,7 +280,7 @@ public class PacketEventsHandler {
             Map<String, NBT> displayTags = display.getTags();
             if (displayTags.containsKey("Name")) {
                 String name = ((NBTString) displayTags.get("Name")).getValue();
-                String translated = applyTranslate(playerId, name);
+                String translated = applyTranslateJson(playerId, name);
                 if (translated != null) {
                     modified = true;
                     display.setTag("Name", new NBTString(translated));
@@ -289,7 +294,7 @@ public class PacketEventsHandler {
                 boolean loreModified = false;
                 for (NBTString line : lore.getTags()) {
                     String lineValue = line.getValue();
-                    String translated = applyTranslate(playerId, lineValue);
+                    String translated = applyTranslateJson(playerId, lineValue);
                     if (translated == null)
                         newLore.addTag(line);
                     else {
@@ -315,7 +320,7 @@ public class PacketEventsHandler {
             ListIterator<Component> linesItr = lore.getLines().listIterator();
             while (linesItr.hasNext()) {
                 Component line = linesItr.next();
-                Component translate = applyTranslate(playerId, line);
+                Component translate = applyTranslateComponent(playerId, line);
                 if (translate != null) {
                     linesItr.set(translate);
                     modified.set(true);
@@ -324,14 +329,14 @@ public class PacketEventsHandler {
         });
 
         stack.getComponent(ComponentTypes.ITEM_NAME).ifPresent(name -> {
-            Component translate = applyTranslate(playerId, name);
+            Component translate = applyTranslateComponent(playerId, name);
             if (translate != null) {
                 stack.setComponent(ComponentTypes.ITEM_NAME, translate);
                 modified.set(true);
             }
         });
         stack.getComponent(ComponentTypes.CUSTOM_NAME).ifPresent(name -> {
-            Component translate = applyTranslate(playerId, name);
+            Component translate = applyTranslateComponent(playerId, name);
             if (translate != null) {
                 stack.setComponent(ComponentTypes.CUSTOM_NAME, translate);
                 modified.set(true);
@@ -346,7 +351,7 @@ public class PacketEventsHandler {
     }
 
     public void applyTranslateOnPacketSendString(PacketSendEvent e, Supplier<String> getMessage, Consumer<String> setMessage) {
-        String translated = applyTranslate(e.getUser().getUUID(), getMessage.get());
+        String translated = applyTranslateJson(e.getUser().getUUID(), getMessage.get());
         if (translated != null) {
             setMessage.accept(translated);
             e.markForReEncode(true);
@@ -357,7 +362,7 @@ public class PacketEventsHandler {
         Component toTranslate = getMessage.get();
         if (toTranslate == null) return false;
         String message = AdventureSerializer.toJson(toTranslate);
-        String translated = applyTranslate(e.getUser().getUUID(), message);
+        String translated = applyTranslateJson(e.getUser().getUUID(), message);
         if (translated != null) {
             setMessage.accept(AdventureSerializer.parseComponent(translated));
             e.markForReEncode(true);
@@ -366,21 +371,100 @@ public class PacketEventsHandler {
         return false;
     }
 
-    public String applyTranslate(UUID playerId, String message) {
-        return AdventureSerializer.toJson(applyTranslate(playerId, AdventureSerializer.parseComponent(message)));
+    private String getLanguage(UUID playerId) {
+        return translatePlayerManager.getPlayerLanguage(playerId);
     }
 
-    public Component applyTranslate(UUID playerId, Component toTranslate) {
-        String playerLanguage = TranslatePlayerManager.getInstance().getPlayerLanguage(playerId);
-        return applyTranslate(playerLanguage, toTranslate);
+    public String applyTranslatePlain(UUID playerId, String plaintext) {
+        return applyTranslatePlain(getLanguage(playerId), plaintext);
     }
 
-    // bite [lang]a[/lang] ee
+    public String applyTranslatePlain(String playerLanguage, String plainTextToTranslate) {
+        StringBuilder sb = new StringBuilder(plainTextToTranslate);
 
-    // bite [lang]a[/lang] ee
+        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+        String startTag = config.getStartTag();
+        String endTag = config.getEndTag();
 
+        int startTagIndex = sb.indexOf(startTag);
+        while (startTagIndex != -1) {
+            int endTagIndex = sb.indexOf(endTag, startTagIndex);
+            if (endTagIndex == -1) break;
+            int startLangPlaceholderIndex = startTagIndex + startTag.length();
 
-    public Component applyTranslate(String playerLanguage, Component toTranslate) {
+            String langPlaceholder = sb.substring(startLangPlaceholderIndex, endTagIndex);
+            String endValue = translatePlaceholderPlain(langPlaceholder, playerLanguage);
+
+            sb.replace(startTagIndex, endTagIndex + endTag.length(), endValue);
+            startTagIndex = sb.indexOf(startTag);
+        }
+
+        String translatedMessage = sb.toString();
+        return translatedMessage.equals(plainTextToTranslate) ? null : translatedMessage;
+    }
+
+    /**
+     * Translate placeholder with params
+     * @param langPlaceholder the placeholder e.g hello_chat{aaaa;bb}
+     * @param playerLanguage the language used to translate
+     * @return the translated text
+     */
+    public String translatePlaceholderPlain(String langPlaceholder, String playerLanguage) {
+        // Load params
+        int startParamIndex = langPlaceholder.indexOf("{");
+        String[] params = null;
+        if (startParamIndex != -1) {
+            params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
+            /*System.out.println("PARAMS " + params);
+            for (int i = 0; i < params.length; i++) {
+                System.out.println("PAAAAARAM " + params[i]);
+                String translate = applyTranslate(playerLanguage, params[i]);
+                if (translate != null) params[i] = translate;
+            }*/
+            langPlaceholder = langPlaceholder.substring(0, startParamIndex);
+        }
+
+        String endValue;
+
+        getEndValue:
+        {
+            Translation translation = translationManager.getTranslation(langPlaceholder);
+            String translationValue;
+            if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null) {
+                endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
+                break getEndValue;
+            }
+            if (params == null) endValue = translationValue;
+            else {
+                StringBuilder translationValueBuilder = new StringBuilder(translationValue);
+                int i = 0;
+                for (String param : params) {
+                    int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
+                    if (paramIndex == -1) break;
+                    Translation paramTranslation = translationManager.getTranslation(param);
+                    translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
+                    i++;
+                }
+                endValue = translationValueBuilder.toString();
+            }
+        }
+
+        return endValue;
+    }
+
+    public String applyTranslateJson(UUID playerId, String json) {
+        return AdventureSerializer.toJson(applyTranslateComponent(playerId, AdventureSerializer.parseComponent(json)));
+    }
+
+    public Component applyTranslateComponent(UUID playerId, String json) {
+        return applyTranslateComponent(playerId, AdventureSerializer.parseComponent(json));
+    }
+
+    public Component applyTranslateComponent(UUID playerId, Component toTranslate) {
+        return applyTranslateComponent(getLanguage(playerId), toTranslate);
+    }
+
+    public Component applyTranslateComponent(String playerLanguage, Component toTranslate) {
         boolean modified = false;
         // I make the component children thing simple, by making a simple list with all the component in order
         LinkedList<Component> components = ComponentUtils.componentSeparatedList(toTranslate);
@@ -396,10 +480,6 @@ public class PacketEventsHandler {
             }
             StringBuilder sb = new StringBuilder(textComponent.content());
 
-            EnderTranslateConfig config = EnderTranslateConfig.getInstance();
-            String startTag = config.getStartTag();
-            String endTag = config.getEndTag();
-
             int startTagIndex = sb.indexOf(startTag);
             int endTagIndex;
             int leftIndex = 0;
@@ -411,7 +491,7 @@ public class PacketEventsHandler {
                     if (endTagIndex == -1) break;
                     int startLangPlaceholderIndex = startTagIndex + startTag.length();
                     String langPlaceholder = sb.substring(startLangPlaceholderIndex, endTagIndex);
-                    Component endValue = translatePlaceholder(langPlaceholder, playerLanguage);
+                    Component endValue = translatePlaceholderComponent(langPlaceholder, playerLanguage);
 
                     // Add left side text
                     splits.add(textComponent.content(sb.substring(leftIndex, startTagIndex)));
@@ -441,9 +521,7 @@ public class PacketEventsHandler {
      * @param playerLanguage
      * @return
      */
-    public Component translatePlaceholder(String langPlaceholder, String playerLanguage) {
-        TranslationManager translationManager = TranslationManager.getInstance();
-
+    public Component translatePlaceholderComponent(String langPlaceholder, String playerLanguage) {
         // Load params
         int startParamIndex = langPlaceholder.indexOf("{");
         String[] params = null;
