@@ -16,6 +16,7 @@ import lombok.Getter;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class EnderTranslateConfig {
     private String editorURL;
     private String defaultLanguage;
     private LinkedHashMap<String, Language> languages = new LinkedHashMap<>();
+    private List<String> cancelHandlers;
 
     public EnderTranslateConfig(File dataFolder) {
         this.dataFolder = dataFolder;
@@ -80,6 +82,8 @@ public class EnderTranslateConfig {
         defaultLanguage = config.getString("defaultLanguage");
 
         languages.clear();
+
+        cancelHandlers = config.getStringList("cancelHandlers");
 
         config.getSection("languages").getRouteMappedBlocks(false).forEach((route, block) -> {
             Section section = (Section) block;

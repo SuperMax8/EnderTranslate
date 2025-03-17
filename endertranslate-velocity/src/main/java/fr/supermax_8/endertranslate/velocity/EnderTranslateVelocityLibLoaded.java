@@ -46,7 +46,6 @@ public class EnderTranslateVelocityLibLoaded {
         VelocityEntityLibPlatform platform = new VelocityEntityLibPlatform(plugin, server);
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
                 .tickTickables()
-                .trackPlatformEntities()
                 .usePlatformLogger();
 
         EntityLib.init(platform, settings);

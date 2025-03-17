@@ -55,5 +55,8 @@ languages:
       - ls;11
       - ls;11
 
+cancelhandler:
+  - "ExampleHandler"
+
 # NEVER CHANGE THIS VALUE
-config-version: 1
+config-version: 2

@@ -37,7 +37,7 @@ public class TranslatePlayerManager {
                 if (!(LanguageManager.getInstance().getLanguageMap().containsKey(player.getSelectedLanguage())))
                     toResetLanguage.add(playerId);
             }
-            toResetLanguage.forEach(id -> setPlayerLanguage(id, defaultLanguage));
+            toResetLanguage.forEach(id -> setPlayerLanguage(id, null));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -45,7 +45,7 @@ public class TranslatePlayerManager {
     }
 
     public void setPlayerLanguage(UUID playerId, String newLanguage) {
-        TranslatePlayer player = players.computeIfAbsent(playerId, k -> new TranslatePlayer(defaultLanguage));
+        TranslatePlayer player = players.computeIfAbsent(playerId, k -> new TranslatePlayer(null));
         player.setSelectedLanguage(newLanguage);
 
         if (playerDataFolder != null) {
@@ -66,7 +66,12 @@ public class TranslatePlayerManager {
 
     public String getPlayerLanguage(UUID playerId) {
         TranslatePlayer player = players.get(playerId);
-        return player == null ? defaultLanguage : player.getSelectedLanguage();
+        return player == null || player.getSelectedLanguage() == null ? defaultLanguage : player.getSelectedLanguage();
+    }
+
+    public boolean isPlayerLanguageSet(UUID playerId) {
+        TranslatePlayer player = players.get(playerId);
+        return !(player == null || player.getSelectedLanguage() == null);
     }
 
 }
