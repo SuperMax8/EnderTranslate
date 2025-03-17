@@ -229,6 +229,7 @@ public class PacketEventsHandler {
 
         // Cancel handlers features
         EnderTranslateConfig.getInstance().getCancelHandlers().forEach(s -> {
+            EnderTranslate.log("cancel handler §c" + s);
             handlers.keySet().removeIf(type -> type.name().equalsIgnoreCase(s));
         });
     }

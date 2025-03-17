@@ -55,7 +55,7 @@ languages:
       - ls;11
       - ls;11
 
-cancelhandler:
+cancelHandlers:
   - "ExampleHandler"
 
 # NEVER CHANGE THIS VALUE
