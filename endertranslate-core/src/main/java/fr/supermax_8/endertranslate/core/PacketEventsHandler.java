@@ -25,6 +25,7 @@ import de.themoep.minedown.adventure.MineDown;
 import fr.supermax_8.endertranslate.core.player.TranslatePlayerManager;
 import fr.supermax_8.endertranslate.core.translation.Translation;
 import fr.supermax_8.endertranslate.core.translation.TranslationManager;
+import fr.supermax_8.endertranslate.core.translation.TranslationValue;
 import fr.supermax_8.endertranslate.core.utils.ComponentUtils;
 import lombok.Getter;
 import me.tofaa.entitylib.meta.EntityMeta;
@@ -439,20 +440,25 @@ public class PacketEventsHandler {
         getEndValue:
         {
             Translation translation = translationManager.getTranslation(langPlaceholder);
-            String translationValue;
-            if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null) {
+            TranslationValue translationValue;
+            if (translation == null || (translationValue = translation.getTranslationValue(playerLanguage)) == null) {
                 endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
                 break getEndValue;
             }
-            if (params == null) endValue = translationValue;
+            String translationValueString = unboxTranslationPlain(playerLanguage, translationValue);
+            if (params == null) endValue = translationValueString;
             else {
-                StringBuilder translationValueBuilder = new StringBuilder(translationValue);
+                StringBuilder translationValueBuilder = new StringBuilder(translationValueString);
                 int i = 0;
                 for (String param : params) {
                     int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
                     if (paramIndex == -1) break;
                     Translation paramTranslation = translationManager.getTranslation(param);
-                    translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
+                    translationValueBuilder.replace(
+                            paramIndex,
+                            paramIndex + 3,
+                            paramTranslation == null ? param : unboxTranslationPlain(playerLanguage, paramTranslation.getTranslationValue(playerLanguage))
+                    );
                     i++;
                 }
                 endValue = translationValueBuilder.toString();
@@ -460,6 +466,11 @@ public class PacketEventsHandler {
         }
 
         return endValue;
+    }
+
+    public String unboxTranslationPlain(String playerLanguage, TranslationValue translationValue) {
+        if (!translationValue.isContainsLangPlaceholder()) return translationValue.getValue();
+        return applyTranslatePlain(playerLanguage, translationValue.getValue());
     }
 
     public String applyTranslateJson(UUID playerId, String json) {
@@ -558,27 +569,30 @@ public class PacketEventsHandler {
         }
 
         Translation translation = translationManager.getTranslation(langPlaceholder);
-        String translationValue;
-        if (translation == null || (translationValue = translation.getTranslation(playerLanguage)) == null)
+        TranslationValue translationValue;
+        if (translation == null || (translationValue = translation.getTranslationValue(playerLanguage)) == null)
             return Component.text("TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND").color(NamedTextColor.RED);
+        String translationValueString = unboxTranslationPlain(playerLanguage, translationValue);
         if (params != null) {
-            StringBuilder translationValueBuilder = new StringBuilder(translationValue);
+            StringBuilder translationValueBuilder = new StringBuilder(translationValueString);
             int i = 0;
             for (String param : params) {
                 int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
                 if (paramIndex == -1) break;
                 Translation paramTranslation = translationManager.getTranslation(param);
-                translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslation == null ? param : paramTranslation.getTranslation(playerLanguage));
+                TranslationValue paramTranslationValue = paramTranslation.getTranslationValue(playerLanguage);
+                String paramTranslationValueString = paramTranslationValue == null ? param : unboxTranslationPlain(playerLanguage, paramTranslationValue);
+                translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslationValueString);
                 i++;
             }
-            translationValue = translationValueBuilder.toString();
+            translationValueString = translationValueBuilder.toString();
         }
 
-        if (translationValue.contains("&"))
-            return MineDown.parse(translationValue);
-        if (translationValue.contains("§"))
-            return MineDown.parse(translationValue.replaceAll("§", "&"));
-        return MiniMessage.miniMessage().deserialize(translationValue);
+        if (translationValueString.contains("&"))
+            return MineDown.parse(translationValueString);
+        if (translationValueString.contains("§"))
+            return MineDown.parse(translationValueString.replaceAll("§", "&"));
+        return MiniMessage.miniMessage().deserialize(translationValueString);
     }
 
 }
