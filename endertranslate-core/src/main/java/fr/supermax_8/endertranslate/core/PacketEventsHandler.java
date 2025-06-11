@@ -580,8 +580,14 @@ public class PacketEventsHandler {
                 int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
                 if (paramIndex == -1) break;
                 Translation paramTranslation = translationManager.getTranslation(param);
-                TranslationValue paramTranslationValue = paramTranslation.getTranslationValue(playerLanguage);
-                String paramTranslationValueString = paramTranslationValue == null ? param : unboxTranslationPlain(playerLanguage, paramTranslationValue);
+                String paramTranslationValueString;
+                if (paramTranslation == null) paramTranslationValueString = param;
+                else {
+                    TranslationValue paramTranslationValue = paramTranslation.getTranslationValue(playerLanguage);
+                    if (paramTranslationValue == null)
+                        paramTranslationValueString = "<red>TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND</red>";
+                    else paramTranslationValueString = unboxTranslationPlain(playerLanguage, paramTranslationValue);
+                }
                 translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslationValueString);
                 i++;
             }
