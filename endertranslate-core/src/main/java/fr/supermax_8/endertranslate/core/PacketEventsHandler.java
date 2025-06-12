@@ -389,7 +389,7 @@ public class PacketEventsHandler {
         return applyTranslatePlain(getLanguage(playerId), plaintext);
     }
 
-    public String applyTranslatePlain(String playerLanguage, String plainTextToTranslate) {
+    /*public String applyTranslatePlain(String playerLanguage, String plainTextToTranslate) {
         StringBuilder sb = new StringBuilder(plainTextToTranslate);
 
         EnderTranslateConfig config = EnderTranslateConfig.getInstance();
@@ -411,61 +411,64 @@ public class PacketEventsHandler {
 
         String translatedMessage = sb.toString();
         return translatedMessage.equals(plainTextToTranslate) ? null : translatedMessage;
+    }*/
+
+    public String applyTranslatePlain(String playerLanguage, String plainTextToTranslate) {
+        String translated = recursiveTranslate(plainTextToTranslate, playerLanguage);
+        return translated.equals(plainTextToTranslate) ? null : translated;
     }
 
-    /**
-     * Translate placeholder with params
-     * @param langPlaceholder the placeholder e.g hello_chat{aaaa;bb}
-     * @param playerLanguage the language used to translate
-     * @return the translated text
-     */
-    public String translatePlaceholderPlain(String langPlaceholder, String playerLanguage) {
-        TranslationManager translationManager = TranslationManager.getInstance();
-        // Load params
-        int startParamIndex = langPlaceholder.indexOf("{");
-        String[] params = null;
-        if (startParamIndex != -1) {
-            params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
-            /*System.out.println("PARAMS " + params);
-            for (int i = 0; i < params.length; i++) {
-                System.out.println("PAAAAARAM " + params[i]);
-                String translate = applyTranslate(playerLanguage, params[i]);
-                if (translate != null) params[i] = translate;
-            }*/
-            langPlaceholder = langPlaceholder.substring(0, startParamIndex);
-        }
+    private String recursiveTranslate(String text, String playerLanguage) {
+        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+        String startTag = config.getStartTag();
+        String endTag = config.getEndTag();
 
-        String endValue;
+        StringBuilder sb = new StringBuilder();
+        int index = 0;
 
-        getEndValue:
-        {
-            Translation translation = translationManager.getTranslation(langPlaceholder);
-            TranslationValue translationValue;
-            if (translation == null || (translationValue = translation.getTranslationValue(playerLanguage)) == null) {
-                endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
-                break getEndValue;
+        while (index < text.length()) {
+            int start = text.indexOf(startTag, index);
+            if (start == -1) {
+                sb.append(text.substring(index));
+                break;
             }
-            String translationValueString = unboxTranslationPlain(playerLanguage, translationValue);
-            if (params == null) endValue = translationValueString;
-            else {
-                StringBuilder translationValueBuilder = new StringBuilder(translationValueString);
-                int i = 0;
-                for (String param : params) {
-                    int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
-                    if (paramIndex == -1) break;
-                    Translation paramTranslation = translationManager.getTranslation(param);
-                    translationValueBuilder.replace(
-                            paramIndex,
-                            paramIndex + 3,
-                            paramTranslation == null ? param : unboxTranslationPlain(playerLanguage, paramTranslation.getTranslationValue(playerLanguage))
-                    );
-                    i++;
+
+            sb.append(text, index, start);
+            int searchIndex = start + startTag.length();
+            int openTags = 1;
+
+            while (searchIndex < text.length()) {
+                int nextStart = text.indexOf(startTag, searchIndex);
+                int nextEnd = text.indexOf(endTag, searchIndex);
+
+                if (nextEnd == -1) break;
+
+                if (nextStart != -1 && nextStart < nextEnd) {
+                    openTags++;
+                    searchIndex = nextStart + startTag.length();
+                } else {
+                    openTags--;
+                    if (openTags == 0) {
+                        String inner = text.substring(start + startTag.length(), nextEnd);
+                        String resolvedInner = recursiveTranslate(inner, playerLanguage);
+                        String translated = translatePlaceholderPlain(resolvedInner, playerLanguage);
+                        sb.append(translated);
+                        index = nextEnd + endTag.length();
+                        break;
+                    } else {
+                        searchIndex = nextEnd + endTag.length();
+                    }
                 }
-                endValue = translationValueBuilder.toString();
+            }
+
+            // Cas où aucune fermeture n’est trouvée
+            if (openTags > 0) {
+                sb.append(text.substring(start));
+                break;
             }
         }
 
-        return endValue;
+        return sb.toString();
     }
 
     public String unboxTranslationPlain(String playerLanguage, TranslationValue translationValue) {
@@ -486,6 +489,98 @@ public class PacketEventsHandler {
     }
 
     public Component applyTranslateComponent(String playerLanguage, Component toTranslate) {
+        boolean modified = false;
+        LinkedList<Component> components = ComponentUtils.componentSeparatedList(toTranslate);
+        ListIterator<Component> itr = components.listIterator();
+
+        while (itr.hasNext()) {
+            Component component = itr.next();
+
+            if (!(component instanceof TextComponent textComponent)) continue;
+
+            HoverEvent hoverEvent = textComponent.hoverEvent();
+            if (hoverEvent != null && hoverEvent.value() instanceof Component hoverText) {
+                Component translatedHover = applyTranslateComponent(playerLanguage, hoverText);
+                if (translatedHover != null)
+                    textComponent = textComponent.hoverEvent(hoverEvent.value(translatedHover));
+            }
+
+            String content = textComponent.content();
+            List<Component> resolvedParts = parseComponentRecursively(content, playerLanguage, textComponent);
+
+            if (resolvedParts.size() == 1 && resolvedParts.get(0).equals(component)) continue;
+
+            itr.remove();
+            resolvedParts.forEach(itr::add);
+            modified = true;
+        }
+
+        return modified ? ComponentUtils.mergeComponents(components) : null;
+    }
+
+    private List<Component> parseComponentRecursively(String text, String language, TextComponent base) {
+        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+        String startTag = config.getStartTag();
+        String endTag = config.getEndTag();
+
+        List<Component> result = new ArrayList<>();
+        int index = 0;
+
+        while (index < text.length()) {
+            int start = text.indexOf(startTag, index);
+            if (start == -1) {
+                result.add(base.content(text.substring(index)));
+                break;
+            }
+
+            result.add(base.content(text.substring(index, start)));
+
+            int search = start + startTag.length();
+            int openTags = 1;
+
+            while (search < text.length()) {
+                int nextStart = text.indexOf(startTag, search);
+                int nextEnd = text.indexOf(endTag, search);
+
+                if (nextEnd == -1) {
+                    result.add(base.content(text.substring(start)));
+                    return result;
+                }
+
+                if (nextStart != -1 && nextStart < nextEnd) {
+                    openTags++;
+                    search = nextStart + startTag.length();
+                } else {
+                    openTags--;
+                    if (openTags == 0) {
+                        String inner = text.substring(start + startTag.length(), nextEnd);
+                        List<Component> resolvedInner = parseComponentRecursively(inner, language, base);
+                        Component translated = translatePlaceholderComponent(flattenComponent(resolvedInner), language);
+                        result.add(translated);
+                        index = nextEnd + endTag.length();
+                        break;
+                    } else {
+                        search = nextEnd + endTag.length();
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private String flattenComponent(List<Component> parts) {
+        StringBuilder sb = new StringBuilder();
+        for (Component part : parts) {
+            if (part instanceof TextComponent txt)
+                sb.append(txt.content());
+            else
+                sb.append(part.toString()); // fallback
+        }
+        return sb.toString();
+    }
+
+    /*public Component applyTranslateComponent(String playerLanguage, Component toTranslate) {
         EnderTranslateConfig config = EnderTranslateConfig.getInstance();
         String startTag = config.getStartTag();
         String endTag = config.getEndTag();
@@ -500,7 +595,7 @@ public class PacketEventsHandler {
             Component component = itr.next();
             // It seems I can get some TranslatableComponent here so I need to check
             if (!(component instanceof TextComponent textComponent)) {
-                /*System.out.println("NOT A TEXT COMP ????" + AdventureSerializer.toJson(component));*/
+                *//*System.out.println("NOT A TEXT COMP ????" + AdventureSerializer.toJson(component));*//*
                 continue;
             }
             HoverEvent hoverEvent = textComponent.hoverEvent();
@@ -542,8 +637,63 @@ public class PacketEventsHandler {
             }
         }
 
-        // I merge back the list to 1 component containing all the others text components
+        // I merge back the list to 1 component containing all the other text components
         return modified ? ComponentUtils.mergeComponents(components) : null;
+    }*/
+
+    /**
+     * Translate placeholder with params
+     * @param langPlaceholder the placeholder e.g hello_chat{aaaa;bb}
+     * @param playerLanguage the language used to translate
+     * @return the translated text
+     */
+    public String translatePlaceholderPlain(String langPlaceholder, String playerLanguage) {
+        TranslationManager translationManager = TranslationManager.getInstance();
+        // Load params
+        int startParamIndex = langPlaceholder.indexOf("{");
+        String[] params = null;
+        if (startParamIndex != -1) {
+            params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
+            langPlaceholder = langPlaceholder.substring(0, startParamIndex);
+        }
+
+        String endValue;
+
+        getEndValue:
+        {
+            Translation translation = translationManager.getTranslation(langPlaceholder);
+            TranslationValue translationValue;
+            if (translation == null || (translationValue = translation.getTranslationValue(playerLanguage)) == null) {
+                endValue = "TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND";
+                break getEndValue;
+            }
+            String translationValueString = unboxTranslationPlain(playerLanguage, translationValue);
+            if (params == null) endValue = translationValueString;
+            else {
+                StringBuilder translationValueBuilder = new StringBuilder(translationValueString);
+                int i = 0;
+                for (String param : params) {
+                    int paramIndex = translationValueBuilder.indexOf("{" + i + "}");
+                    if (paramIndex == -1) break;
+                    Translation paramTranslation = translationManager.getTranslation(param);
+                    String paramTranslationValueString;
+                    if (paramTranslation == null) {
+                        String translated = applyTranslatePlain(playerLanguage, param);
+                        paramTranslationValueString = translated == null ? param : translated;
+                    } else {
+                        TranslationValue paramTranslationValue = paramTranslation.getTranslationValue(playerLanguage);
+                        if (paramTranslationValue == null)
+                            paramTranslationValueString = "<red>TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND</red>";
+                        else paramTranslationValueString = unboxTranslationPlain(playerLanguage, paramTranslationValue);
+                    }
+                    translationValueBuilder.replace(paramIndex, paramIndex + 3, paramTranslationValueString);
+                    i++;
+                }
+                endValue = translationValueBuilder.toString();
+            }
+        }
+
+        return endValue;
     }
 
     /**
@@ -559,12 +709,6 @@ public class PacketEventsHandler {
         String[] params = null;
         if (startParamIndex != -1) {
             params = langPlaceholder.substring(startParamIndex + 1, langPlaceholder.length() - 1).split(";");
-            /*System.out.println("PARAMS " + params);
-            for (int i = 0; i < params.length; i++) {
-                System.out.println("PAAAAARAM " + params[i]);
-                String translate = applyTranslate(playerLanguage, params[i]);
-                if (translate != null) params[i] = translate;
-            }*/
             langPlaceholder = langPlaceholder.substring(0, startParamIndex);
         }
 
@@ -581,8 +725,10 @@ public class PacketEventsHandler {
                 if (paramIndex == -1) break;
                 Translation paramTranslation = translationManager.getTranslation(param);
                 String paramTranslationValueString;
-                if (paramTranslation == null) paramTranslationValueString = param;
-                else {
+                if (paramTranslation == null) {
+                    String translated = applyTranslatePlain(playerLanguage, param);
+                    paramTranslationValueString = translated == null ? param : translated;
+                } else {
                     TranslationValue paramTranslationValue = paramTranslation.getTranslationValue(playerLanguage);
                     if (paramTranslationValue == null)
                         paramTranslationValueString = "<red>TRANSLATION(id=" + langPlaceholder + ")_NOT_FOUND</red>";
@@ -597,7 +743,7 @@ public class PacketEventsHandler {
         if (translationValueString.contains("&"))
             return MineDown.parse(translationValueString);
         if (translationValueString.contains("§"))
-            return MineDown.parse(translationValueString.replaceAll("§", "&"));
+            return MineDown.parse(translationValueString.replace("§", "&"));
         return MiniMessage.miniMessage().deserialize(translationValueString);
     }
 
