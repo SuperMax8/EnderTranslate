@@ -228,6 +228,15 @@ public class PacketEventsHandler {
             });
         });
 
+        rgHandler(UPDATE_ADVANCEMENTS, e -> {
+            WrapperPlayServerUpdateAdvancements packet = new WrapperPlayServerUpdateAdvancements(e);
+            for (WrapperPlayServerUpdateAdvancements.Advancement advancement : packet.getAdvancements()) {
+                WrapperPlayServerUpdateAdvancements.AdvancementDisplay advancementDisplay = advancement.getDisplay();
+                applyTranslateOnPacketSend(e, advancementDisplay::getDescription, advancementDisplay::setDescription);
+                applyTranslateOnPacketSend(e, advancementDisplay::getTitle, advancementDisplay::setTitle);
+            }
+        });
+
         // Cancel handlers features
         EnderTranslateConfig.getInstance().getCancelHandlers().forEach(s -> {
             EnderTranslate.log("cancel handler §c" + s);
