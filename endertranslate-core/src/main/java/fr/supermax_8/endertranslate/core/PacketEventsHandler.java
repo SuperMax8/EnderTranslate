@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.*;
@@ -514,8 +515,7 @@ public class PacketEventsHandler {
                     textComponent = textComponent.hoverEvent(hoverEvent.value(translatedHover));
             }
 
-            String content = textComponent.content();
-            List<Component> resolvedParts = parseComponentRecursively(content, playerLanguage, textComponent);
+            List<Component> resolvedParts = parseComponentRecursively(textComponent.content(), playerLanguage, textComponent);
 
             if (resolvedParts.size() == 1 && resolvedParts.get(0).equals(component)) continue;
 
@@ -564,7 +564,7 @@ public class PacketEventsHandler {
                     if (openTags == 0) {
                         String inner = text.substring(start + startTag.length(), nextEnd);
                         List<Component> resolvedInner = parseComponentRecursively(inner, language, base);
-                        Component translated = translatePlaceholderComponent(flattenComponent(resolvedInner), language);
+                        Component translated = translatePlaceholderComponent(flattenComponent(resolvedInner), language, base.style());
                         result.add(translated);
                         index = nextEnd + endTag.length();
                         break;
@@ -588,67 +588,6 @@ public class PacketEventsHandler {
         }
         return sb.toString();
     }
-
-    /*public Component applyTranslateComponent(String playerLanguage, Component toTranslate) {
-        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
-        String startTag = config.getStartTag();
-        String endTag = config.getEndTag();
-
-        boolean modified = false;
-        // I make the component children thing simple, by making a simple list with all the component in order
-        LinkedList<Component> components = ComponentUtils.componentSeparatedList(toTranslate);
-        ListIterator<Component> itr = components.listIterator();
-
-        // I iterate on the list and I will add more component / replace if I need
-        while (itr.hasNext()) {
-            Component component = itr.next();
-            // It seems I can get some TranslatableComponent here so I need to check
-            if (!(component instanceof TextComponent textComponent)) {
-                *//*System.out.println("NOT A TEXT COMP ????" + AdventureSerializer.toJson(component));*//*
-                continue;
-            }
-            HoverEvent hoverEvent = textComponent.hoverEvent();
-            if (hoverEvent != null && hoverEvent.value() instanceof Component hoverText) {
-                Component translatedHover = applyTranslateComponent(playerLanguage, hoverText);
-                if (translatedHover != null)
-                    textComponent = textComponent.hoverEvent(hoverEvent.value(translatedHover));
-            }
-            StringBuilder sb = new StringBuilder(textComponent.content());
-
-            int startTagIndex = sb.indexOf(startTag);
-            int endTagIndex;
-            int leftIndex = 0;
-            if (startTagIndex != -1) {
-                // Split the component in multiple parts to insert the translation component result
-                LinkedList<Component> splits = new LinkedList<>();
-                while (startTagIndex != -1) {
-                    endTagIndex = sb.indexOf(endTag, startTagIndex);
-                    if (endTagIndex == -1) break;
-                    int startLangPlaceholderIndex = startTagIndex + startTag.length();
-                    String langPlaceholder = sb.substring(startLangPlaceholderIndex, endTagIndex);
-                    Component endValue = translatePlaceholderComponent(langPlaceholder, playerLanguage);
-
-                    // Add left side text
-                    splits.add(textComponent.content(sb.substring(leftIndex, startTagIndex)));
-                    // Add translation comp
-                    splits.add(endValue);
-
-                    leftIndex = endTagIndex + endTag.length();
-                    startTagIndex = sb.indexOf(startTag, endTagIndex);
-                    modified = true;
-                }
-                // Add the right part of the translation
-                if (leftIndex <= sb.length())
-                    splits.add(textComponent.content(sb.substring(leftIndex, sb.length())));
-                itr.remove();
-                for (Component c : splits)
-                    itr.add(c);
-            }
-        }
-
-        // I merge back the list to 1 component containing all the other text components
-        return modified ? ComponentUtils.mergeComponents(components) : null;
-    }*/
 
     /**
      * Translate placeholder with params
@@ -705,13 +644,17 @@ public class PacketEventsHandler {
         return endValue;
     }
 
+    public Component translatePlaceholderComponent(String langPlaceholder, String playerLanguage) {
+        return translatePlaceholderComponent(langPlaceholder, playerLanguage, null);
+    }
+
     /**
      * Translate placeholder with params
      * @param langPlaceholder the placeholder e.g hello_chat{aaaa;bb}
      * @param playerLanguage
      * @return
      */
-    public Component translatePlaceholderComponent(String langPlaceholder, String playerLanguage) {
+    public Component translatePlaceholderComponent(String langPlaceholder, String playerLanguage, Style previousStyle) {
         TranslationManager translationManager = TranslationManager.getInstance();
         // Load params
         int startParamIndex = langPlaceholder.indexOf("{");
@@ -749,11 +692,16 @@ public class PacketEventsHandler {
             translationValueString = translationValueBuilder.toString();
         }
 
+        Component finalComp;
         if (translationValueString.contains("&"))
-            return MineDown.parse(translationValueString);
-        if (translationValueString.contains("§"))
-            return MineDown.parse(translationValueString.replace("§", "&"));
-        return MiniMessage.miniMessage().deserialize(translationValueString);
+            finalComp = MineDown.parse(translationValueString);
+        else if (translationValueString.contains("§"))
+            finalComp = MineDown.parse(translationValueString.replace("§", "&"));
+        else finalComp = MiniMessage.miniMessage().deserialize(translationValueString);
+
+        if (previousStyle != null && !finalComp.hasStyling())
+            return finalComp.style(previousStyle);
+        return finalComp;
     }
 
 }
