@@ -48,6 +48,8 @@ import static com.github.retrooper.packetevents.protocol.packettype.PacketType.P
 
 public class PacketEventsHandler {
 
+    private static final int MAX_TRANSLATION_DEPTH = 10;
+
     @Getter
     private static PacketEventsHandler instance;
 
@@ -424,11 +426,26 @@ public class PacketEventsHandler {
     }*/
 
     public String applyTranslatePlain(String playerLanguage, String plainTextToTranslate) {
+        EnderTranslateConfig config = EnderTranslateConfig.getInstance();
+        String startTag = config.getStartTag();
+        String endTag = config.getEndTag();
+
+        if (plainTextToTranslate.equals(startTag) || plainTextToTranslate.equals(endTag)) {
+            return null;
+        }
+
         String translated = recursiveTranslate(plainTextToTranslate, playerLanguage);
         return translated.equals(plainTextToTranslate) ? null : translated;
     }
 
     private String recursiveTranslate(String text, String playerLanguage) {
+        return recursiveTranslate(text, playerLanguage, 0);
+    }
+
+    private String recursiveTranslate(String text, String playerLanguage, int depth) {
+        if (depth > MAX_TRANSLATION_DEPTH)
+            return text;
+
         EnderTranslateConfig config = EnderTranslateConfig.getInstance();
         String startTag = config.getStartTag();
         String endTag = config.getEndTag();
@@ -444,6 +461,7 @@ public class PacketEventsHandler {
             }
 
             sb.append(text, index, start);
+
             int searchIndex = start + startTag.length();
             int openTags = 1;
 
@@ -451,27 +469,28 @@ public class PacketEventsHandler {
                 int nextStart = text.indexOf(startTag, searchIndex);
                 int nextEnd = text.indexOf(endTag, searchIndex);
 
-                if (nextEnd == -1) break;
+                if (nextEnd == -1) {
+                    sb.append(text.substring(start));
+                    return sb.toString();
+                }
 
                 if (nextStart != -1 && nextStart < nextEnd) {
                     openTags++;
                     searchIndex = nextStart + startTag.length();
                 } else {
                     openTags--;
+                    searchIndex = nextEnd + endTag.length();
                     if (openTags == 0) {
                         String inner = text.substring(start + startTag.length(), nextEnd);
-                        String resolvedInner = recursiveTranslate(inner, playerLanguage);
+                        String resolvedInner = recursiveTranslate(inner, playerLanguage, depth + 1);
                         String translated = translatePlaceholderPlain(resolvedInner, playerLanguage);
                         sb.append(translated);
                         index = nextEnd + endTag.length();
                         break;
-                    } else {
-                        searchIndex = nextEnd + endTag.length();
                     }
                 }
             }
 
-            // Cas où aucune fermeture n’est trouvée
             if (openTags > 0) {
                 sb.append(text.substring(start));
                 break;
@@ -528,11 +547,17 @@ public class PacketEventsHandler {
     }
 
     private List<Component> parseComponentRecursively(String text, String language, TextComponent base) {
+        return parseComponentRecursively(text, language, base, 0);
+    }
+
+    private List<Component> parseComponentRecursively(String text, String language, TextComponent base, int depth) {
         EnderTranslateConfig config = EnderTranslateConfig.getInstance();
         String startTag = config.getStartTag();
         String endTag = config.getEndTag();
 
         List<Component> result = new ArrayList<>();
+        if (depth > MAX_TRANSLATION_DEPTH)
+            return result;
         int index = 0;
 
         while (index < text.length()) {
@@ -561,17 +586,25 @@ public class PacketEventsHandler {
                     search = nextStart + startTag.length();
                 } else {
                     openTags--;
+                    search = nextEnd + endTag.length();
                     if (openTags == 0) {
                         String inner = text.substring(start + startTag.length(), nextEnd);
-                        List<Component> resolvedInner = parseComponentRecursively(inner, language, base);
-                        Component translated = translatePlaceholderComponent(flattenComponent(resolvedInner), language, base.style());
+                        List<Component> resolvedInner = parseComponentRecursively(inner, language, base, depth + 1);
+                        Component translated = translatePlaceholderComponent(
+                                flattenComponent(resolvedInner),
+                                language,
+                                base.style()
+                        );
                         result.add(translated);
                         index = nextEnd + endTag.length();
                         break;
-                    } else {
-                        search = nextEnd + endTag.length();
                     }
                 }
+            }
+
+            if (openTags > 0) {
+                result.add(base.content(text.substring(start)));
+                break;
             }
         }
 
