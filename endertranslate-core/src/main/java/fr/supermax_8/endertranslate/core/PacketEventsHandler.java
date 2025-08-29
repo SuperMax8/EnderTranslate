@@ -15,6 +15,7 @@ import com.github.retrooper.packetevents.protocol.item.ItemStack;
 import com.github.retrooper.packetevents.protocol.nbt.*;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
+import com.github.retrooper.packetevents.protocol.player.Equipment;
 import com.github.retrooper.packetevents.protocol.player.User;
 import com.github.retrooper.packetevents.protocol.score.FixedScoreFormat;
 import com.github.retrooper.packetevents.protocol.score.ScoreFormat;
@@ -180,6 +181,19 @@ public class PacketEventsHandler {
             applyTranslateOnItemStacks(e, packet.getItems());
             packet.getCarriedItem().ifPresent(itm -> applyTranslateOnItemStack(e, itm));
         });
+        rgHandler(ENTITY_EQUIPMENT, e -> {
+            WrapperPlayServerEntityEquipment packet = new WrapperPlayServerEntityEquipment(e);
+            for (Equipment equipment : packet.getEquipment())
+                applyTranslateOnItemStack(e, equipment.getItem());
+        });
+        rgHandler(SET_CURSOR_ITEM, e -> {
+            WrapperPlayServerSetCursorItem packet = new WrapperPlayServerSetCursorItem(e);
+            applyTranslateOnItemStack(e, packet.getStack());
+        });
+        rgHandler(SET_PLAYER_INVENTORY, e -> {
+            WrapperPlayServerSetPlayerInventory packet = new WrapperPlayServerSetPlayerInventory(e);
+            applyTranslateOnItemStack(e, packet.getStack());
+        });
         rgHandler(SET_SLOT, e -> {
             WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(e);
             applyTranslateOnItemStack(e, packet.getItem());
@@ -230,7 +244,6 @@ public class PacketEventsHandler {
                 applyTranslateOnPacketSend(e, scoreBoardTeamInfo::getSuffix, scoreBoardTeamInfo::setSuffix);
             });
         });
-
         rgHandler(UPDATE_ADVANCEMENTS, e -> {
             WrapperPlayServerUpdateAdvancements packet = new WrapperPlayServerUpdateAdvancements(e);
             for (WrapperPlayServerUpdateAdvancements.Advancement advancement : packet.getAdvancements()) {
@@ -238,6 +251,10 @@ public class PacketEventsHandler {
                 applyTranslateOnPacketSend(e, advancementDisplay::getDescription, advancementDisplay::setDescription);
                 applyTranslateOnPacketSend(e, advancementDisplay::getTitle, advancementDisplay::setTitle);
             }
+        });
+        rgHandler(SERVER_DATA, e -> {
+            WrapperPlayServerServerData packet = new WrapperPlayServerServerData(e);
+            applyTranslateOnPacketSend(e, packet::getMOTD, packet::setMOTD);
         });
 
         // Cancel handlers features
