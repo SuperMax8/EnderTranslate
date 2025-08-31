@@ -3,19 +3,18 @@ package fr.supermax_8.endertranslate.core.communication.packets;
 import fr.supermax_8.endertranslate.core.communication.ServerWebSocketClient;
 import fr.supermax_8.endertranslate.core.communication.WebSocketServer;
 import fr.supermax_8.endertranslate.core.communication.WsPacket;
+import lombok.AllArgsConstructor;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.util.List;
 
+@AllArgsConstructor
 public class EditorInfosPacket implements WsPacket {
 
-    private List<String> translationFilesPaths;
-    private List<String> languages;
-
-    public EditorInfosPacket(List<String> translationFilesPaths, List<String> languages) {
-        this.translationFilesPaths = translationFilesPaths;
-        this.languages = languages;
-    }
+    private final List<String> translationFilesPaths;
+    private final List<String> languages;
+    private final String startTag;
+    private final String endTag;
 
     @Override
     public void receiveFromClient(Session jettySession, WebSocketServer socket) {

@@ -27,7 +27,9 @@ public class EditorAuthPacket implements WsPacket {
             // Send the main server config to him
             editor.sendPacket(new EditorInfosPacket(
                     TranslationManager.getInstance().getAllFilesPaths(),
-                    new ArrayList<>(EnderTranslateConfig.getInstance().getLanguages().keySet())
+                    new ArrayList<>(EnderTranslateConfig.getInstance().getLanguages().keySet()),
+                    EnderTranslateConfig.getInstance().getStartTag(),
+                    EnderTranslateConfig.getInstance().getEndTag()
             ));
         } else jettySession.close();
     }

@@ -27,95 +27,131 @@ let ws: WebSocket;
 let languages: Array<string>;
 let currentPagePath: string;
 
+let startTag;
+let endTag;
+
 let saveTranslation;
 let secret;
 
-const TranslationComp: React.FC<{ entry: TranslationEntry, deleteEntry: (entry: TranslationEntry) => void }> = ({
-                                                                                                                    entry,
-                                                                                                                    deleteEntry
-                                                                                                                }) => {
+const App: React.FC = () => {
+    const [paths, setPaths] = useState(["loading.json", "the/fileTree.json", "if you have time to read it, it means that the websocket doesn't connect correctly, check your plugin config"]);
+    const [translationPage, setTranslationPage] = useState<TranslationFile>();
+    const [openCollapsibles, setOpenCollapsibles] = useState<Record<string, boolean>>({});
+    let newEntrySpamCount = 0;
+
+    const TranslationComp: React.FC<{ entry: TranslationEntry, deleteEntry: (entry: TranslationEntry) => void }> = ({
+                                                                                                                        entry,
+                                                                                                                        deleteEntry
+                                                                                                                    }) => {
 
 
-    console.log(languages)
-    return (
-        <div className="p-5 rounded-md bg-accent flex flex-row gap-4 relative">
-            <div className="flex flex-col w-full">
-                <Collapsible>
-                    <div className="flex flex-row gap-x-3 items-center">
-                        <div className="w-1/4">
-                            <FloatedTextInput label="Translation Id" defaultValue={entry.id}
-                                              onChange={e => {
-                                                  e.target.value = e.target.value.replace(/\./g, "_");
-                                                  entry.id = e.target.value;
-                                                  saveTranslation()
-                                              }}/>
-                        </div>
-                        <div>
-                            <CollapsibleTrigger asChild>
-                                <Button size="sm">
-                                    <Label>Languages: </Label>
-                                    <ChevronsUpDown className="h-4 w-4"/>
-                                </Button>
-                            </CollapsibleTrigger>
-                        </div>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="destructive">
-                                    <X className="h-4 w-4"/>
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>Are you sure you want to delete this translation?</AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction className="text-red-600"
-                                                       onClick={() => deleteEntry(entry)}>Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                    <CollapsibleContent>
-                        <div className="flex flex-col gap-y-4 m-4">
-                            {
-                                languages.map((languageId) => (
-                                    <div key={languageId + entry.id}>
-                                        <FloatedTextInput
-                                            label={languageId}
-                                            key={languageId + entry.id}
-                                            defaultValue={entry.values.get(languageId) ? entry.values.get(languageId) : ''}
-                                            onChange={e => {
-                                                entry.values.set(languageId, e.target.value)
-                                                saveTranslation()
-                                            }}
-                                        />
-                                    </div>
-                                ))
-                            }
-                        </div>
-                    </CollapsibleContent>
-                </Collapsible>
-            </div>
-        </div>
-    );
-};
-
-const TranslationFileComp: React.FC<{
-    id: string,
-    translationFile: TranslationFile | undefined,
-    addNewEntry: () => void
-    deleteEntry: (entry: TranslationEntry) => void
-}> = ({
-          id,
-          translationFile,
-          addNewEntry,
-          deleteEntry
-      }) => {
-    if (translationFile) {
-
+        console.log(languages)
         return (
-            <div className="flex flex-col flex-grow h-full">
+            <div className="p-5 rounded-md bg-accent flex flex-row gap-4 relative">
+                <div className="flex flex-col w-full">
+                    <Collapsible onOpenChange={
+                        open => {
+                            setOpenCollapsibles(prev => ({...prev, [entry.id]: open}))
+                        }
+                    } open={openCollapsibles[entry.id] ?? false}>
+                        <div className="flex flex-row gap-x-3 items-center">
+                            <div className="w-1/4">
+                                <FloatedTextInput label="Translation Id" defaultValue={entry.id}
+                                                  onChange={e => {
+                                                      e.target.value = e.target.value.replace(/\./g, "_");
+                                                      entry.id = e.target.value;
+                                                      saveTranslation()
+                                                  }}/>
 
-                <div className="text-4xl
+                            </div>
+                            <div>
+                                <CollapsibleTrigger asChild>
+                                    <Button size="sm">
+                                        <Label>Languages: </Label>
+                                        <ChevronsUpDown className="h-4 w-4"/>
+                                    </Button>
+                                </CollapsibleTrigger>
+                            </div>
+                            <Button onClick={() => {
+                                if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(`${startTag}${entry.id}${endTag}`)
+                                        .then(() => console.log("Copied !"))
+                                        .catch(err => console.error("Failed to copy: ", err));
+                                } else {
+                                    // fallback for old
+                                    const textArea = document.createElement("textarea");
+                                    textArea.value = `${startTag}${entry.id}${endTag}`;
+                                    document.body.appendChild(textArea);
+                                    textArea.select();
+                                    document.execCommand("copy");
+                                    document.body.removeChild(textArea);
+                                }
+                                toast({
+                                    title: "Copied!",
+                                    description: "The tag has been copied to your clipboard.",
+                                })
+                            }}>
+                                <Label>Copy tag</Label>
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="destructive">
+                                        <X className="h-4 w-4"/>
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>Are you sure you want to delete this
+                                        translation?</AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction className="text-red-600"
+                                                           onClick={() => deleteEntry(entry)}>Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                        <CollapsibleContent>
+                            <div className="flex flex-col gap-y-4 m-4">
+                                {
+                                    languages.map((languageId) => (
+                                        <div key={languageId + entry.id}>
+                                            <FloatedTextInput
+                                                label={languageId}
+                                                key={languageId + entry.id}
+                                                defaultValue={entry.values.get(languageId) ? entry.values.get(languageId) : ''}
+                                                onChange={e => {
+                                                    entry.values.set(languageId, e.target.value)
+                                                    saveTranslation()
+                                                }}
+                                            />
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
+                </div>
+            </div>
+        );
+    };
+
+    const TranslationFileComp: React.FC<{
+        id: string,
+        translationFile: TranslationFile | undefined,
+        addNewEntry: () => void
+        deleteEntry: (entry: TranslationEntry) => void
+    }> = ({
+              id,
+              translationFile,
+              addNewEntry,
+              deleteEntry
+          }) => {
+        if (translationFile) {
+
+            return (
+                <div className="flex flex-col flex-grow h-full">
+
+                    <div className="text-4xl
                 underline decoration-gray-200 decoration-4
                 flex flex-row items-center gap-x-4
                 w-fit
@@ -124,41 +160,36 @@ const TranslationFileComp: React.FC<{
                 ring-4 hover:ring-blue-300 transition-all
                 rounded-lg
                 ">
-                    <File className="h-14 w-14"/>
-                    <h1>{id}</h1>
-                </div>
-
-                <ScrollArea>
-                    <div className="flex flex-col m-5 gap-y-5 h-max">
-                        {translationFile.entries.map(entry => (
-                            // eslint-disable-next-line react-hooks/rules-of-hooks
-                            <TranslationComp key={React.useId()} entry={entry} deleteEntry={deleteEntry}/>
-                        ))}
-                        <div className="flex w-full justify-center">
-                            <Button onClick={() => {
-                                addNewEntry()
-                            }}>
-                                Create a new translation
-                            </Button>
-                        </div>
+                        <File className="h-14 w-14"/>
+                        <h1>{id}</h1>
                     </div>
-                </ScrollArea>
-            </div>
-        )
-    } else {
-        return (
-            <div className="w-full h-full flex justify-center items-center">
-                <h1 className="text-5xl font-bold text-center
-                hover:text-6xl transition-all p-10">Click on a translation file in the tree to open it</h1>
-            </div>
-        )
-    }
-}
 
-const App: React.FC = () => {
-    const [paths, setPaths] = useState(["loading.json", "the/fileTree.json", "if you have time to read it, it means that the websocket doesn't connect correctly, check your plugin config"]);
-    const [translationPage, setTranslationPage] = useState<TranslationFile>();
-    let newEntrySpamCount = 0;
+                    <ScrollArea>
+                        <div className="flex flex-col m-5 gap-y-5 h-max">
+                            {translationFile.entries.map(entry => (
+                                // eslint-disable-next-line react-hooks/rules-of-hooks
+                                <TranslationComp key={React.useId()} entry={entry} deleteEntry={deleteEntry}/>
+                            ))}
+                            <div className="flex w-full justify-center">
+                                <Button onClick={() => {
+                                    addNewEntry()
+                                }}>
+                                    Create a new translation
+                                </Button>
+                            </div>
+                        </div>
+                    </ScrollArea>
+                </div>
+            )
+        } else {
+            return (
+                <div className="w-full h-full flex justify-center items-center">
+                    <h1 className="text-5xl font-bold text-center
+                hover:text-6xl transition-all p-10">Click on a translation file in the tree to open it</h1>
+                </div>
+            )
+        }
+    }
 
     const addNewEntry = () => {
         if (translationPage?.entries.some(entry => entry.id == "")) {
@@ -174,6 +205,8 @@ const App: React.FC = () => {
         const newEntry = new TranslationEntry("", new Map());
         translationPage?.entries.push(newEntry);
         setTranslationPage(new TranslationFile(translationPage?.entries));
+
+        setOpenCollapsibles(prev => ({...prev, [""]: true}));
         saveTranslation();
     };
 
@@ -228,7 +261,10 @@ const App: React.FC = () => {
                         const pathList = packetValues.translationFilesPaths;
                         setPaths([...pathList]);
                         languages = packetValues.languages;
-                        console.log(pathList)
+                        startTag = packetValues.startTag ? packetValues.startTag : "[lang]";
+                        endTag = packetValues.endTag ? packetValues.endTag : "[/lang]";
+                        console.log(pathList);
+                        console.log("Tags: ", startTag, endTag);
                         break;
                     case "EditorPagePacket":
                         setTranslationPage(TranslationFile.fromJSON(packetValues.file));
@@ -362,12 +398,12 @@ const App: React.FC = () => {
                 </ResizablePanel>
                 <ResizableHandle withHandle/>
                 <ResizablePanel>
-                    <TranslationFileComp key={translationPage?.toJSON()} id={currentPagePath}
+                    <TranslationFileComp id={currentPagePath}
                                          translationFile={translationPage} addNewEntry={addNewEntry}
                                          deleteEntry={deleteEntry}/>
                 </ResizablePanel>
             </ResizablePanelGroup>
-            <Toaster />
+            <Toaster/>
         </div>
     );
 };
