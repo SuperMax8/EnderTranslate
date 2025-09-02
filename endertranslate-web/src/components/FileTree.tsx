@@ -196,7 +196,7 @@ const FileTree: React.FC<FileTreeProps> = ({
         }));
 
         return (
-            <div ref={dropRef} className="h-32">
+            <div ref={dropRef as unknown as React.Ref<HTMLDivElement>} className="h-32">
                 {props.children}
             </div>
         );
@@ -256,8 +256,9 @@ const FileTree: React.FC<FileTreeProps> = ({
         }
 
         return (
-            <div className={backgroundColor} ref={node.isDirectory ? drop : null}>
-                <div ref={drag}>
+            <div className={backgroundColor}
+                 ref={node.isDirectory ? drop as unknown as React.Ref<HTMLDivElement> : null}>
+                <div ref={drag as unknown as React.Ref<HTMLDivElement>}>
                     <ContextMenu>
                         <ContextMenuTrigger>
                             <div
