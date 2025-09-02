@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export class TranslationEntry {
     private _id: string;
     public values: Map<string, string>;
@@ -6,7 +8,7 @@ export class TranslationEntry {
     constructor(id: string, values: Map<string, string>) {
         this._id = id;
         this.values = values;
-        this.__key = crypto.randomUUID();
+        this.__key = uuidv4();
     }
 
     public get id(): string {
