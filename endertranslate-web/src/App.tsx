@@ -36,32 +36,40 @@ let secret;
 const App: React.FC = () => {
     const [paths, setPaths] = useState(["loading.json", "the/fileTree.json", "if you have time to read it, it means that the websocket doesn't connect correctly, check your plugin config"]);
     const [translationPage, setTranslationPage] = useState<TranslationFile>();
-    const [openCollapsibles, setOpenCollapsibles] = useState<Record<string, boolean>>({});
+    const [isConnected, setIsConnected] = useState(false);
+
+
+    const prepareTranslationFile = (tf: TranslationFile) => {
+        tf.entries.sort((a, b) => a.id.localeCompare(b.id));
+        return tf;
+    };
+
     let newEntrySpamCount = 0;
 
     const TranslationComp: React.FC<{ entry: TranslationEntry, deleteEntry: (entry: TranslationEntry) => void }> = ({
                                                                                                                         entry,
                                                                                                                         deleteEntry
                                                                                                                     }) => {
+        const [open, setOpen] = useState(false);
 
-
-        console.log(languages)
         return (
             <div className="p-5 rounded-md bg-accent flex flex-row gap-4 relative">
                 <div className="flex flex-col w-full">
-                    <Collapsible onOpenChange={
-                        open => {
-                            setOpenCollapsibles(prev => ({...prev, [entry.id]: open}))
-                        }
-                    } open={openCollapsibles[entry.id] ?? false}>
+                    <Collapsible
+                        onOpenChange={setOpen}
+                        open={open}
+                    >
                         <div className="flex flex-row gap-x-3 items-center">
                             <div className="w-1/4">
-                                <FloatedTextInput label="Translation Id" defaultValue={entry.id}
-                                                  onChange={e => {
-                                                      e.target.value = e.target.value.replace(/\./g, "_");
-                                                      entry.id = e.target.value;
-                                                      saveTranslation()
-                                                  }}/>
+                                <FloatedTextInput
+                                    label="Translation Id"
+                                    defaultValue={entry.id}
+                                    onChange={e => {
+                                        e.target.value = e.target.value.replace(/\./g, "_");
+                                        entry.id = e.target.value;
+                                        saveTranslation();
+                                    }}
+                                />
 
                             </div>
                             <div>
@@ -137,15 +145,42 @@ const App: React.FC = () => {
 
     const TranslationFileComp: React.FC<{
         id: string,
-        translationFile: TranslationFile | undefined,
-        addNewEntry: () => void
-        deleteEntry: (entry: TranslationEntry) => void
+        translationFile: TranslationFile | undefined
     }> = ({
               id,
-              translationFile,
-              addNewEntry,
-              deleteEntry
+              translationFile
           }) => {
+
+        const [, setUpdateCounter] = useState(0);
+
+        const addNewEntry = () => {
+            if (!translationPage) return;
+            if (translationPage.entries.some(entry => entry.id == "")) {
+                if (newEntrySpamCount === 4) {
+                    newEntrySpamCount = 0;
+                    window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+                }
+                newEntrySpamCount++;
+                return;
+            }
+            newEntrySpamCount = 0;
+
+            const newEntry = new TranslationEntry("", new Map());
+
+            translationPage.entries.push(newEntry);
+            prepareTranslationFile(translationPage);
+            setUpdateCounter(prev => prev + 1);
+            saveTranslation();
+        };
+
+        const deleteEntry = (entry: TranslationEntry) => {
+            if (!translationPage) return;
+            translationPage.entries.splice(translationPage?.entries.indexOf(entry), 1);
+            prepareTranslationFile(translationPage);
+            setUpdateCounter(prev => prev + 1);
+            saveTranslation();
+        }
+
         if (translationFile) {
 
             return (
@@ -167,8 +202,7 @@ const App: React.FC = () => {
                     <ScrollArea>
                         <div className="flex flex-col m-5 gap-y-5 h-max">
                             {translationFile.entries.map(entry => (
-                                // eslint-disable-next-line react-hooks/rules-of-hooks
-                                <TranslationComp key={React.useId()} entry={entry} deleteEntry={deleteEntry}/>
+                                <TranslationComp key={entry.__key} entry={entry} deleteEntry={deleteEntry}/>
                             ))}
                             <div className="flex w-full justify-center">
                                 <Button onClick={() => {
@@ -191,32 +225,10 @@ const App: React.FC = () => {
         }
     }
 
-    const addNewEntry = () => {
-        if (translationPage?.entries.some(entry => entry.id == "")) {
-            if (newEntrySpamCount === 4) {
-                newEntrySpamCount = 0;
-                // Rick Roll
-                window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-            }
-            newEntrySpamCount++;
-            return;
-        }
-        newEntrySpamCount = 0;
-        const newEntry = new TranslationEntry("", new Map());
-        translationPage?.entries.push(newEntry);
-        setTranslationPage(new TranslationFile(translationPage?.entries));
-
-        setOpenCollapsibles(prev => ({...prev, [""]: true}));
-        saveTranslation();
-    };
-
-    const deleteEntry = (entry: TranslationEntry) => {
-        translationPage?.entries.splice(translationPage?.entries.indexOf(entry), 1);
-        setTranslationPage(new TranslationFile(translationPage?.entries));
-        saveTranslation();
-    }
-
     saveTranslation = () => {
+        if (translationPage) {
+            translationPage.entries.sort((a, b) => a.id.localeCompare(b.id));
+        }
         const packet = {
             "EditorSaveFilePacket": {
                 path: currentPagePath,
@@ -236,6 +248,7 @@ const App: React.FC = () => {
             ws = new WebSocket(websocketUrl);
             console.log("WsUrl: " + websocketUrl)
             ws.onopen = () => {
+                setIsConnected(true);
                 console.log("Ws opened")
                 const packet = {
                     "EditorAuthPacket": {
@@ -267,18 +280,23 @@ const App: React.FC = () => {
                         console.log("Tags: ", startTag, endTag);
                         break;
                     case "EditorPagePacket":
-                        setTranslationPage(TranslationFile.fromJSON(packetValues.file));
+                        setTranslationPage(prepareTranslationFile(TranslationFile.fromJSON(packetValues.file)));
                         console.log("Set page", packetValues.file)
                         break;
                 }
 
             }
             ws.onclose = async (e) => {
+                setIsConnected(false);
                 console.log("closeEvent", e)
                 console.log("Reconnection...")
                 setTimeout(() => {
                     if (ws.readyState !== WebSocket.OPEN) websocket();
                 }, 3000)
+            }
+
+            ws.onerror = () => {
+                setIsConnected(false);
             }
         }
 
@@ -301,17 +319,19 @@ const App: React.FC = () => {
                                 <img src={textlogo}></img>
                             </div>
                             <div className="">
-                                <Button className="w-fit" onClick={() => {
-                                    ws.send(JSON.stringify({
-                                        "ReloadPluginPacket": {}
-                                    }))
-                                    toast({
-                                        title: "Plugin reloaded !"
-                                    })
-                                    console.log("Plugin reloaded")
-                                }}>
-                                    Reload Plugin <Settings/>
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className={`inline-block h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+                                        title={isConnected ? 'Connected' : 'Disconnected'}
+                                    />
+                                    <Button className="w-fit" onClick={() => {
+                                        ws.send(JSON.stringify({"ReloadPluginPacket": {}}))
+                                        toast({title: "Plugin reloaded !"})
+                                        console.log("Plugin reloaded")
+                                    }}>
+                                        Reload Plugin <Settings/>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                         <ScrollArea className="h-full max-h-[65%] pb-14">
@@ -399,8 +419,7 @@ const App: React.FC = () => {
                 <ResizableHandle withHandle/>
                 <ResizablePanel>
                     <TranslationFileComp id={currentPagePath}
-                                         translationFile={translationPage} addNewEntry={addNewEntry}
-                                         deleteEntry={deleteEntry}/>
+                                         translationFile={translationPage}/>
                 </ResizablePanel>
             </ResizablePanelGroup>
             <Toaster/>

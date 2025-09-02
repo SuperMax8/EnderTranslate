@@ -1,10 +1,12 @@
 export class TranslationEntry {
-    _id: string;
+    private _id: string;
     public values: Map<string, string>;
+    public __key: string;
 
     constructor(id: string, values: Map<string, string>) {
         this._id = id;
         this.values = values;
+        this.__key = crypto.randomUUID();
     }
 
     public get id(): string {
@@ -50,7 +52,7 @@ export class TranslationFile {
                 mapValues.set(key, value);
             }
 
-            return {"id": entry.id, "values": mapValues};
+            return new TranslationEntry(entry.id, mapValues);
         });
 
         return new TranslationFile(entries);
