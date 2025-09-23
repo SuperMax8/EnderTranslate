@@ -6,7 +6,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.5.1</version>
+        <version>1.5.2</version>
     </parent>
 
     <artifactId>libsCompile</artifactId>
@@ -165,43 +165,43 @@
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-api</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-bungeecord</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-spigot</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-velocity</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.5</version>
         </dependency>
 
         <dependency>
             <groupId>me.tofaa.entitylib</groupId>
             <artifactId>common</artifactId>
-            <version>+d4c3b1e-SNAPSHOT</version>
+            <version>+cef23ea-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>me.tofaa.entitylib</groupId>
             <artifactId>api</artifactId>
-            <version>+d4c3b1e-SNAPSHOT</version>
+            <version>+cef23ea-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>me.tofaa.entitylib</groupId>
             <artifactId>spigot</artifactId>
-            <version>+d4c3b1e-SNAPSHOT</version>
+            <version>+cef23ea-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>me.tofaa.entitylib</groupId>
             <artifactId>velocity</artifactId>
-            <version>+d4c3b1e-SNAPSHOT</version>
+            <version>+cef23ea-SNAPSHOT</version>
         </dependency>
 
 

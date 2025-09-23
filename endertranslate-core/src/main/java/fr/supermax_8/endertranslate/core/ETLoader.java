@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 public class ETLoader {
 
     private static final String[] libsLink = {
-            "https://github.com/SuperMax8/EnderTranslate/releases/download/1.4.2/endertranslate-libs-1.4.2.jar"
+            "https://github.com/SuperMax8/EnderTranslate/releases/download/1.5.1/endertranslate-libs-1.5.1.jar"
     };
 
     public static void loadExternalLibs(File dataFolder) throws IOException {
@@ -32,7 +32,7 @@ public class ETLoader {
             return;
         }
 
-        EnderTranslate.log("If you have problems loading libs, you can download them directly and put it in plugins/BoostedAudio/libs");
+        EnderTranslate.log("If you have problems loading libs, you can download them directly and put it in plugins/EnderTranslate/libs");
         for (String link : libsLink) {
             EnderTranslate.log(link);
             File lib = new File(libs, link.substring(link.lastIndexOf('/') + 1));
