@@ -64,4 +64,4 @@ cancelHandlers:
   - "ExampleHandler"
 
 # NEVER CHANGE THIS VALUE
-config-version: 2
+config-version: 3
