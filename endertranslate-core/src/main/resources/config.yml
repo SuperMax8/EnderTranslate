@@ -55,6 +55,11 @@ languages:
       - ls;11
       - ls;11
 
+# Replace feature, replace in all translation values the first string of the = by the second
+#replace:
+#  - "a=b"
+#  - "c=d"
+
 cancelHandlers:
   - "ExampleHandler"
 

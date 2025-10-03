@@ -2,6 +2,7 @@ package fr.supermax_8.endertranslate.core.translation;
 
 import com.google.gson.Gson;
 import fr.supermax_8.endertranslate.core.EnderTranslate;
+import fr.supermax_8.endertranslate.core.EnderTranslateConfig;
 import fr.supermax_8.endertranslate.core.language.LanguageManager;
 import fr.supermax_8.endertranslate.core.utils.ResourceUtils;
 import lombok.Getter;
@@ -96,11 +97,17 @@ public class TranslationManager {
             // Get the translation and add them in the same order as the languages config
             ArrayList<String> translations = new ArrayList<>();
             for (String lId : LanguageManager.getInstance().getLanguages())
-                translations.add(translationsMap.get(lId));
+                translations.add(applyReplaces(translationsMap.get(lId)));
 
             Translation translation = new Translation(translations);
             this.translations.put(entry.id, translation);
         });
+    }
+
+    private String applyReplaces(String s) {
+        for (Map.Entry<String, String> en : EnderTranslateConfig.getInstance().getReplaceMap().entrySet())
+            s = s.replace(en.getKey(), en.getValue());
+        return s;
     }
 
     public Translation getTranslation(String placeholder) {

@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class EnderTranslateConfig {
     private String defaultLanguage;
     private LinkedHashMap<String, Language> languages = new LinkedHashMap<>();
     private List<String> cancelHandlers;
+    private HashMap<String, String> replaceMap = new HashMap<>();
 
     public EnderTranslateConfig(File dataFolder) {
         this.dataFolder = dataFolder;
@@ -102,6 +104,13 @@ public class EnderTranslateConfig {
             config.set("secret", secret);
             modified = true;
         }
+
+        config.getOptionalStringList("replace").ifPresent(l -> {
+            l.forEach(s -> {
+                String[] r = s.split("=", 2);
+                replaceMap.put(r[0], r[1]);
+            });
+        });
 
         if (modified) config.save();
     }
