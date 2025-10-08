@@ -2,6 +2,7 @@ package fr.supermax_8.endertranslate.core;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.chat.message.ChatMessage;
@@ -66,7 +67,7 @@ public class PacketEventsHandler {
     }
 
     private void initPackets() {
-        PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract() {
+        PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract(PacketListenerPriority.HIGHEST) {
             @Override
             public void onPacketReceive(PacketReceiveEvent e) {
                 if (e.getPacketType() == PacketType.Configuration.Client.CLIENT_SETTINGS) {
