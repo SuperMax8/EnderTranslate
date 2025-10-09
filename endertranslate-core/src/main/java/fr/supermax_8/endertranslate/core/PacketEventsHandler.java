@@ -39,6 +39,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,9 +56,8 @@ public class PacketEventsHandler {
     @Getter
     private static PacketEventsHandler instance;
 
-    private final ConcurrentHashMap<Integer, EntityType> entitiesType = new ConcurrentHashMap<>();
     @Getter
-    private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata>> entitiesMetaData = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, EntityData>> playerEntitiesData = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<PacketType.Play.Server, Consumer<PacketSendEvent>> handlers = new ConcurrentHashMap<>();
 
@@ -66,17 +66,26 @@ public class PacketEventsHandler {
         initPackets();
     }
 
+    private static class EntityData {
+        EntityType type;
+        WrapperPlayServerEntityMetadata entityMetadata;
+    }
+
+    private Map<Integer, EntityData> getPlayerEntitiesData(UUID playerId) {
+        return playerEntitiesData.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>());
+    }
+
     private void initPackets() {
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract(PacketListenerPriority.HIGHEST) {
             @Override
-            public void onPacketReceive(PacketReceiveEvent e) {
+            public void onPacketReceive(@NotNull PacketReceiveEvent e) {
                 if (e.getPacketType() == PacketType.Configuration.Client.CLIENT_SETTINGS) {
                     WrapperConfigClientSettings packet = new WrapperConfigClientSettings(e);
                     EnderTranslate.log("Player local: " + packet.getLocale());
                 }
             }
 
-            public void onPacketSend(PacketSendEvent e) {
+            public void onPacketSend(@NotNull PacketSendEvent e) {
                 try {
                     handlePacket(e);
                 } catch (Throwable ex) {
@@ -134,22 +143,27 @@ public class PacketEventsHandler {
         });
         rgHandler(SPAWN_ENTITY, e -> {
             WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(e);
-            entitiesType.put(packet.getEntityId(), packet.getEntityType());
+            Map<Integer, EntityData> entityDataMap = getPlayerEntitiesData(e.getUser().getUUID());
+            EntityData entityData = new EntityData();
+            entityData.type = packet.getEntityType();
+            entityDataMap.put(packet.getEntityId(), entityData);
         });
         rgHandler(DESTROY_ENTITIES, e -> {
             WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(e);
-            ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entityDataSent = entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>());
-            for (int id : packet.getEntityIds()) {
-                entitiesType.remove(id);
-                entityDataSent.remove(id);
-            }
+            Map<Integer, EntityData> entityDataMap = getPlayerEntitiesData(e.getUser().getUUID());
+            for (int id : packet.getEntityIds())
+                entityDataMap.remove(id);
         });
         rgHandler(ENTITY_METADATA, e -> {
             try {
                 WrapperPlayServerEntityMetadata clone = new WrapperPlayServerEntityMetadata(e);
                 WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(e);
                 int entityId = packet.getEntityId();
-                EntityType entityType = entitiesType.get(entityId);
+
+                Map<Integer, EntityData> entityDataMap = getPlayerEntitiesData(e.getUser().getUUID());
+                EntityData entityData = entityDataMap.get(entityId);
+                if (entityData == null) return;
+                EntityType entityType = entityData.type;
 
                 Metadata meta = new Metadata(entityId);
                 meta.setMetaFromPacket(packet);
@@ -171,10 +185,11 @@ public class PacketEventsHandler {
                     }
                 }
                 if (translated) {
-                    entitiesMetaData.computeIfAbsent(e.getUser().getUUID(), k -> new ConcurrentHashMap<>()).put(entityId, clone);
+                    entityDataMap.computeIfAbsent(entityId, k -> new EntityData()).entityMetadata = clone;
                     e.setLastUsedWrapper(packet);
                 }
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
         });
         rgHandler(WINDOW_ITEMS, e -> {
@@ -278,8 +293,10 @@ public class PacketEventsHandler {
 
     public void resendEntityMetaPackets(Object playerObj) {
         User user = PacketEvents.getAPI().getPlayerManager().getUser(playerObj);
-        ConcurrentHashMap<Integer, WrapperPlayServerEntityMetadata> entityMetadataSent = entitiesMetaData.computeIfAbsent(user.getUUID(), k -> new ConcurrentHashMap<>());
-        entityMetadataSent.values().forEach(user::sendPacket);
+        Map<Integer, EntityData> entityDataMap = getPlayerEntitiesData(user.getUUID());
+        for (EntityData entityData : entityDataMap.values())
+            if (entityData.entityMetadata != null)
+                user.sendPacket(entityData.entityMetadata);
     }
 
     public void applyTranslateOnScoreboardFormat(PacketSendEvent e, ScoreFormat format, Consumer<ScoreFormat> setFormat) {

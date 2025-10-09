@@ -71,14 +71,14 @@ public class EndertranslateVelocity {
     public void onDisconnect(DisconnectEvent e) {
         PacketEventsHandler handler = PacketEventsHandler.getInstance();
         if (handler == null) return;
-        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
+        handler.getPlayerEntitiesData().remove(e.getPlayer().getUniqueId());
     }
 
     @Subscribe
     public void onSwitchServ(ServerConnectedEvent e) {
         PacketEventsHandler handler = PacketEventsHandler.getInstance();
         if (handler == null) return;
-        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
+        handler.getPlayerEntitiesData().remove(e.getPlayer().getUniqueId());
     }
 
 }

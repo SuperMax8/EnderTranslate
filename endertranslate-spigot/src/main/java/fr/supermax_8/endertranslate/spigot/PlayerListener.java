@@ -41,7 +41,7 @@ public class PlayerListener implements Listener {
     public void quit(PlayerQuitEvent e) {
         PacketEventsHandler handler = PacketEventsHandler.getInstance();
         if (handler == null) return;
-        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
+        handler.getPlayerEntitiesData().remove(e.getPlayer().getUniqueId());
     }
 
 }

@@ -54,14 +54,14 @@ public final class EndertranslateBungee extends Plugin implements Listener {
     public void onDisconnect(PlayerDisconnectEvent e) {
         PacketEventsHandler handler = PacketEventsHandler.getInstance();
         if (handler == null) return;
-        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
+        handler.getPlayerEntitiesData().remove(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void onSwitchServ(ServerConnectedEvent e) {
         PacketEventsHandler handler = PacketEventsHandler.getInstance();
         if (handler == null) return;
-        handler.getEntitiesMetaData().remove(e.getPlayer().getUniqueId());
+        handler.getPlayerEntitiesData().remove(e.getPlayer().getUniqueId());
     }
 
 }
