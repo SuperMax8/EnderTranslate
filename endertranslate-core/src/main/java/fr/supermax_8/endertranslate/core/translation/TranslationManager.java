@@ -105,6 +105,7 @@ public class TranslationManager {
     }
 
     private String applyReplaces(String s) {
+        if (s == null) return null;
         for (Map.Entry<String, String> en : EnderTranslateConfig.getInstance().getReplaceMap().entrySet())
             s = s.replace(en.getKey(), en.getValue());
         return s;

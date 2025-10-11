@@ -1,1 +1,18 @@
-{"entries":[{"id":"endertranslate_langchange","values":{"english":"§aYou changed your language to {0}","french":"§aVous avez changé votre language pour {0}"}},{"id":"endertranslate_chooselang","values":{"english":"Choose your language","french":"Choisissez votre langue"}}]}
+{
+  "entries": [
+    {
+      "id": "endertranslate_langchange",
+      "values": {
+        "english": "§aYou changed your language to {0}",
+        "french": "§aVous avez changé votre language pour {0}"
+      }
+    },
+    {
+      "id": "endertranslate_chooselang",
+      "values": {
+        "english": "Choose your language",
+        "french": "Choisissez votre langue"
+      }
+    }
+  ]
+}
