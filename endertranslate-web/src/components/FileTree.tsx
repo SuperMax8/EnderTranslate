@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import {FloatedTextInput} from "@/components/ui/FloatedTextInput.tsx";
 import {useDrag, useDrop} from 'react-dnd';
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 interface TreeNode {
     name: string;
@@ -58,6 +59,7 @@ interface FileTreeProps {
     moveFileProvider
 }
 
+
 const FileTree: React.FC<FileTreeProps> = ({
                                                initialPaths,
                                                onFolderClick,
@@ -97,8 +99,8 @@ const FileTree: React.FC<FileTreeProps> = ({
             }, 100)
         }*/
 
-    const addRootFile = () => {
-        const newFileName = "New File.json"; // Exemple de nouveau fichier
+    const addFile = (path) => {
+        const newFileName = (path ? path + "/" : "") + "New File.json";
         let newName = newFileName;
         let count = 1;
         while (paths.includes(newName)) {
@@ -109,8 +111,8 @@ const FileTree: React.FC<FileTreeProps> = ({
         createFileProvider(newName);
     };
 
-    const addRootFolder = () => {
-        const newFolderName = "New Folder";
+    const addFolder = (path) => {
+        const newFolderName = (path ? path + "/" : "") + "New Folder";
         let newName = newFolderName;
         let count = 1;
         while (paths.includes(newName)) {
@@ -119,7 +121,6 @@ const FileTree: React.FC<FileTreeProps> = ({
         }
         setPaths([...paths, newName]);
         createFileProvider(newName);
-        /*        reOpenFolders()*/
     };
 
     const rename = (path: string, newName: string) => {
@@ -196,7 +197,7 @@ const FileTree: React.FC<FileTreeProps> = ({
         }));
 
         return (
-            <div ref={dropRef as unknown as React.Ref<HTMLDivElement>} className="h-32">
+            <div ref={dropRef as unknown as React.Ref<HTMLDivElement>} className={"h-32"}>
                 {props.children}
             </div>
         );
@@ -289,7 +290,12 @@ const FileTree: React.FC<FileTreeProps> = ({
                         </ContextMenuTrigger>
                         <ContextMenuContent>
                             <ContextMenuItem
-                                onClick={() => setOpenRename(true)}>Rename</ContextMenuItem>
+                                onClick={() => addFile(node.isDirectory ? parentPath + "/" + fileName : parentPath)}>Create
+                                File</ContextMenuItem>
+                            <ContextMenuItem
+                                onClick={() => addFolder(node.isDirectory ? parentPath + "/" + fileName : parentPath)}>Create
+                                Folder</ContextMenuItem>
+                            <ContextMenuItem onClick={() => setOpenRename(true)}>Rename</ContextMenuItem>
                             <ContextMenuItem onClick={() => {
                                 setOpenDelete(true)
                             }}>
@@ -344,17 +350,23 @@ const FileTree: React.FC<FileTreeProps> = ({
         )
     }
 
-    return <div className="p-5 text-2xl">
+    return <div className="text-2xl h-full m-5 overflow-hidden">
         <div className="
         flex flex-row items-center gap-x-3
         border-b-4
         mb-5 pb-3 w-full">
             <h1 className="text-2xl">Translation Files</h1>
-            <FilePlus className="h-8 w-8 hover:scale-110 transition-all" onClick={addRootFile}/>
-            <FolderPlus className="h-8 w-8 hover:scale-110 transition-all" onClick={addRootFolder}/>
+            <FilePlus className="h-8 w-8 hover:scale-110 transition-all" onClick={() => addFile(null)}/>
+            <FolderPlus className="h-8 w-8 hover:scale-110 transition-all" onClick={() => addFolder(null)}/>
         </div>
-        {renderTree(tree)}
-        <Root/>
+
+        <ScrollArea>
+            <div className="h-[40rem]">
+                {renderTree(tree)}
+                <Root/>
+            </div>
+        </ScrollArea>
+
     </div>;
 }
 

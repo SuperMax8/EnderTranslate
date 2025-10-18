@@ -181,10 +181,11 @@ public class TranslationManager {
     public void createFile(String relativePath) {
         File f = new File(translationFolder, relativePath);
         if (f.getName().endsWith(".json")) {
-            try (FileWriter writer = new FileWriter(f)) {
-                writer.write(EnderTranslate.getGson().toJson(new TranslationFile(List.of())));
-            } catch (Exception e) {
-            }
+            if (!f.exists())
+                try (FileWriter writer = new FileWriter(f)) {
+                    writer.write(EnderTranslate.getGson().toJson(new TranslationFile(List.of())));
+                } catch (Exception e) {
+                }
         } else f.mkdirs();
     }
 

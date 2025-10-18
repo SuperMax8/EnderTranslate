@@ -215,7 +215,8 @@ const TranslationFileComp: React.FC<{
                 <ScrollArea>
                     <div className="flex flex-col m-5 gap-y-5 h-max">
                         {translationFile.entries.map(entry => (
-                            <TranslationComp key={entry.__key} entry={entry} deleteEntry={deleteEntry} saveTranslation={saveTranslation}/>
+                            <TranslationComp key={entry.__key} entry={entry} deleteEntry={deleteEntry}
+                                             saveTranslation={saveTranslation}/>
                         ))}
                         <div className="flex w-full justify-center">
                             <Button onClick={() => {
@@ -318,8 +319,8 @@ const App: React.FC = () => {
         <div className="flex flex-row h-screen bg-background">
             <ResizablePanelGroup direction="horizontal">
                 <ResizablePanel defaultSize={20} minSize={15} maxSize={50}>
-                    <div className="bg-background border-r-2 border-accent h-full">
-                        <div className="flex items-center justify-center flex-col pb-14">
+                    <div className="bg-background border-r-2 border-accent h-full flex flex-col">
+                        <div className="flex items-center justify-center flex-col pb-10 h-1/5">
                             <div className="mx-5 max-w-[30rem]">
                                 <img src={textlogo}></img>
                             </div>
@@ -339,7 +340,8 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <ScrollArea className="h-full max-h-[65%] pb-14">
+
+                        <div>
                             <FileTree key={paths.join(';')} initialPaths={paths}
                                       onFileClick={(e) => {
                                           currentPagePath = e.join('/');
@@ -417,7 +419,7 @@ const App: React.FC = () => {
                                           setTranslationPage(undefined)
                                       }}
                             />
-                        </ScrollArea>
+                        </div>
                     </div>
 
                 </ResizablePanel>
