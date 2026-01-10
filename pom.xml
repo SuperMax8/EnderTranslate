@@ -6,7 +6,7 @@
 
     <groupId>fr.supermax_8</groupId>
     <artifactId>endertranslate</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
     <packaging>pom</packaging>
 
     <name>EnderTranslate</name>
@@ -36,6 +36,11 @@
 
     <repositories>
         <repository>
+            <id>entitylib</id>
+            <url>https://maven.pvphub.me/tofaa</url>
+        </repository>
+
+        <repository>
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
@@ -62,10 +67,6 @@
         <repository>
             <id>codemc-snapshots</id>
             <url>https://repo.codemc.io/repository/maven-snapshots/</url>
-        </repository>
-        <repository>
-            <id>evokegames-snapshot</id>
-            <url>https://maven.evokegames.gg/snapshots</url>
         </repository>
     </repositories>
 

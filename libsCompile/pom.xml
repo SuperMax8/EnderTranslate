@@ -6,7 +6,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.5.3</version>
+        <version>1.5.4</version>
     </parent>
 
     <artifactId>libsCompile</artifactId>
@@ -165,45 +165,44 @@
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-api</artifactId>
-            <version>2.9.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.retrooper</groupId>
-            <artifactId>packetevents-bungeecord</artifactId>
-            <version>2.9.5</version>
+            <version>2.11.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-spigot</artifactId>
-            <version>2.9.5</version>
+            <version>2.11.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-bungeecord</artifactId>
+            <version>2.11.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-velocity</artifactId>
-            <version>2.9.5</version>
+            <version>2.11.1</version>
         </dependency>
 
         <dependency>
-            <groupId>me.tofaa.entitylib</groupId>
-            <artifactId>common</artifactId>
-            <version>+cef23ea-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>me.tofaa.entitylib</groupId>
+            <groupId>io.github.tofaa2</groupId>
             <artifactId>api</artifactId>
-            <version>+cef23ea-SNAPSHOT</version>
+            <version>3.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>me.tofaa.entitylib</groupId>
+            <groupId>io.github.tofaa2</groupId>
             <artifactId>spigot</artifactId>
-            <version>+cef23ea-SNAPSHOT</version>
+            <version>3.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>me.tofaa.entitylib</groupId>
-            <artifactId>velocity</artifactId>
-            <version>+cef23ea-SNAPSHOT</version>
+            <groupId>io.github.tofaa2</groupId>
+            <artifactId>common</artifactId>
+            <version>3.0.3-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.github.tofaa2</groupId>
+            <artifactId>velocity</artifactId>
+            <version>3.0.3-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>de.themoep</groupId>
@@ -213,12 +212,12 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.24.0</version>
+            <version>4.25.0</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.24.0</version>
+            <version>4.25.0</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
