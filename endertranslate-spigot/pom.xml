@@ -10,7 +10,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.5.4</version>
+        <version>1.5.5</version>
     </parent>
     <name>endertranslate-spigot</name>
 
@@ -97,9 +97,10 @@
         <dependency>
             <groupId>com.github.retrooper</groupId>
             <artifactId>packetevents-spigot</artifactId>
-            <version>2.11.1</version>
+            <version>2.11.2</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>io.github.tofaa2</groupId>
             <artifactId>api</artifactId>

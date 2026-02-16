@@ -6,7 +6,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.5.4</version>
+        <version>1.5.5</version>
     </parent>
 
     <artifactId>libsCompile</artifactId>
@@ -89,12 +89,16 @@
                                     <pattern>io.javalin</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.javalin</shadedPattern>
                                 </relocation>
-<!--
-                                <relocation>
+
+
+                                <!--relocation>
                                     <pattern>net.kyori</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.kyori</shadedPattern>
                                 </relocation>-->
-
+                                <!--<relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.gson</shadedPattern>
+                                </relocation>
                                 <relocation>
                                     <pattern>com.github.retrooper.packetevents</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents</shadedPattern>
@@ -102,7 +106,7 @@
                                 <relocation>
                                     <pattern>io.github.retrooper.packetevents</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents</shadedPattern>
-                                </relocation>
+                                </relocation>-->
                                 <relocation>
                                     <pattern>me.tofaa.entitylib</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.entitylib</shadedPattern>
@@ -136,6 +140,12 @@
     </repositories>
 
     <dependencies>
+<!--        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.13.2</version>
+        </dependency>-->
+
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
@@ -162,26 +172,26 @@
             <version>3.1.10</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.retrooper</groupId>
-            <artifactId>packetevents-api</artifactId>
-            <version>2.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.retrooper</groupId>
-            <artifactId>packetevents-spigot</artifactId>
-            <version>2.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.retrooper</groupId>
-            <artifactId>packetevents-bungeecord</artifactId>
-            <version>2.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.retrooper</groupId>
-            <artifactId>packetevents-velocity</artifactId>
-            <version>2.11.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.retrooper</groupId>-->
+<!--            <artifactId>packetevents-api</artifactId>-->
+<!--            <version>2.11.2</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.retrooper</groupId>-->
+<!--            <artifactId>packetevents-spigot</artifactId>-->
+<!--            <version>2.11.2</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.retrooper</groupId>-->
+<!--            <artifactId>packetevents-bungeecord</artifactId>-->
+<!--            <version>2.11.2</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.retrooper</groupId>-->
+<!--            <artifactId>packetevents-velocity</artifactId>-->
+<!--            <version>2.11.2</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>io.github.tofaa2</groupId>

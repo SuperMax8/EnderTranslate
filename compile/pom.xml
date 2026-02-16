@@ -6,7 +6,7 @@
     <parent>
         <groupId>fr.supermax_8</groupId>
         <artifactId>endertranslate</artifactId>
-        <version>1.5.4</version>
+        <version>1.5.5</version>
     </parent>
 
     <groupId>fr.supermax_8.endertranslate</groupId>
@@ -94,11 +94,14 @@
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.javalin</shadedPattern>
                                 </relocation>
 
-<!--                                <relocation>
+                                <!--<relocation>
                                     <pattern>net.kyori</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.kyori</shadedPattern>
                                 </relocation>-->
-
+                                <!--<relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>fr.supermax_8.endertranslate.libs.gson</shadedPattern>
+                                </relocation>
                                 <relocation>
                                     <pattern>com.github.retrooper.packetevents</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents</shadedPattern>
@@ -106,7 +109,7 @@
                                 <relocation>
                                     <pattern>io.github.retrooper.packetevents</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.packetevents</shadedPattern>
-                                </relocation>
+                                </relocation>-->
                                 <relocation>
                                     <pattern>me.tofaa.entitylib</pattern>
                                     <shadedPattern>fr.supermax_8.endertranslate.libs.entitylib</shadedPattern>

@@ -16,6 +16,7 @@ public class EnderTranslateSpigotPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        ETLoader.libsLink.add("https://github.com/retrooper/packetevents/releases/download/v2.11.2/packetevents-spigot-2.11.2.jar");
         long elapsedTime = ETLoader.loadLibs(getDataFolder());
         System.out.println("Libs loaded in " + elapsedTime + " ms");
 

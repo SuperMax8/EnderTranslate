@@ -8,12 +8,14 @@ import java.io.IOException;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ETLoader {
 
-    private static final String[] libsLink = {
-            "https://github.com/SuperMax8/EnderTranslate/releases/download/1.5.4/endertranslate-libs-1.5.4.jar"
-    };
+    public static final List<String> libsLink = new ArrayList<>() {{
+        add("https://github.com/SuperMax8/EnderTranslate/releases/download/1.5.5/endertranslate-libs-1.5.5.jar");
+    }};
 
     public static void loadExternalLibs(File dataFolder) throws IOException {
         EnderTranslate.log("Loading external libs");
@@ -59,6 +61,7 @@ public class ETLoader {
             if (AIO.exists()) {
                 JarDependency dependency = new JarDependency(AIO.toPath());
                 JarLoader.load(dependency, loader);
+                System.out.println("AIO LOADED");
                 long ts2 = System.currentTimeMillis();
                 return ts2 - ts;
             }

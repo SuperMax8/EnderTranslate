@@ -41,12 +41,11 @@ public class EndertranslateVelocity {
         this.pluginContainer = pluginContainer;
         this.dataDirectory = dataDirectory;
         this.logger = logger;
-
-
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        ETLoader.libsLink.add("https://github.com/retrooper/packetevents/releases/download/v2.11.2/packetevents-velocity-2.11.2.jar");
         long elapsedTime = ETLoader.loadLibs(dataDirectory.toFile());
         System.out.println("Libs loaded in " + elapsedTime + " ms");
 

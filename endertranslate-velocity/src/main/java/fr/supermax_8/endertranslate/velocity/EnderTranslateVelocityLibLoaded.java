@@ -38,6 +38,7 @@ public class EnderTranslateVelocityLibLoaded {
                 .checkForUpdates(false)
                 .bStats(false);
         PacketEvents.getAPI().init();
+        PacketEvents.getAPI().load();
 
         int protocolVersion = PacketEvents.getAPI().getServerManager().getVersion().getProtocolVersion();
         System.out.println("PROTO VERSION : " + protocolVersion);
